@@ -8,13 +8,8 @@ const client = new NoodleJS({
  
 client.connect();
 
-setTimeout(() => {
-    // console.log(client.channels.array()[2])
-    console.log(client.user.channel)
-    // client.user.channel = client.channels.array()[2]
-}, 3000);
-
 
 export const mumbleClient = {
-
+    getChannels: () => client.channels.array(),
+    getCurrentChannel: () => client.user.channel
 }
