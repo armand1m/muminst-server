@@ -1,7 +1,8 @@
 import dotenv from 'dotenv'
 import express from 'express'
 import cors from 'cors'
-import { mumbleClient } from './mumbleService'
+import { mumbleClient } from './services/mumbleService'
+import { fileService } from './services/fileService'
 
 dotenv.config()
 
@@ -24,6 +25,12 @@ app.get('/current-channel', (_, res) => {
 
 app.get('/channels', (_, res) => {
     res.json(mumbleClient.getChannels())
+})
+
+app.get('/sounds', async (_, res) => {
+    const sounds = await fileService.listSounds()
+
+    res.json(sounds)
 })
 
 app.listen(port, () => {
