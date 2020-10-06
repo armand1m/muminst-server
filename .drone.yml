@@ -1,0 +1,15 @@
+kind: pipeline
+type: kubernetes
+name: "Build Docker Image"
+steps:
+- name: docker  
+  image: plugins/docker
+  settings:
+    repo: armand1m/muminst-server
+    auto_tag: true
+    auto_tag_suffix: linux-amd64
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+
