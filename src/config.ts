@@ -26,7 +26,7 @@ const createConfig = () => {
     port: Number(process.env.PORT) ?? 4000,
     audioPath: process.env.AUDIO_PATH,
     mumbleUrl: process.env.MUMBLE_URL,
-    mumbleUserName: process.env.NAME,
+    mumbleUserName: process.env.MUMBLE_USERNAME,
   };
 
   try {
