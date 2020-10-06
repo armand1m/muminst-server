@@ -5,9 +5,10 @@ services:
       context: .
     image: muminst-server:latest
     environment:
+      HOSTNAME: localhost
       PORT: 4000
       MUMBLE_URL: intruder.network
-      NAME: InstantButtonComiOCuDeQuemTaLendo
+      MUMBLE_USERNAME: InstantButtonComiOCuDeQuemTaLendo
       AUDIO_PATH: /app/audio
     volumes:
       - ./audio:/app/audio

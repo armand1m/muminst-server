@@ -1,17 +1,19 @@
-require('dotenv').config()
-const NoodleJS = require('noodle.js')
+// @ts-ignore
+import NoodleJS from 'noodle.js';
+import { Config } from '../config';
 
 const client = new NoodleJS({
-    url: process.env.MUMBLE_URL,
-    name: process.env.NAME,
-})
+  url: Config.mumbleUrl,
+  name: Config.mumbleUserName,
+});
 
-client.connect()
+client.connect();
 
 export const mumbleClient = {
-    getChannels: () => client.channels.array(),
-    getCurrentChannel: () => client.user.channel,
-    playSong: (path: string) => client.voiceConnection.playFile(path),
-    stop: client.voiceConnection.stop,
-    setVolume: client.voiceConnection.setVolume,
-}
+  getChannels: () => client.channels.array(),
+  getCurrentChannel: () => client.user.channel,
+  playFile: (filename: string) =>
+    client.voiceConnection.playFile(filename),
+  stop: client.voiceConnection.stop,
+  setVolume: client.voiceConnection.setVolume,
+};
