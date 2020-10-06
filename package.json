@@ -8,9 +8,12 @@
         "express": "^4.17.1",
         "noodle.js": "^1.3.0",
         "ts-node": "^9.0.0",
+        "tslib": "^2.0.1",
         "typescript": "^4.0.3"
     },
     "scripts": {
-        "start": "ts-node ./src/main.ts"
-    }
+        "start": "ts-node ./src/main.ts",
+        "build": "tsc"
+    },
+    "license": "MIT"
 }
