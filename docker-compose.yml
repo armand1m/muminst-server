@@ -1,0 +1,20 @@
+version: '3.1'
+services:
+  app:
+    build:
+      context: .
+    image: muminst-server:latest
+    environment:
+      PORT: 4000
+      MUMBLE_URL: intruder.network
+      NAME: InstantButtonComiOCuDeQuemTaLendo
+      AUDIO_PATH: /app/audio
+    volumes:
+      - ./audio:/app/audio
+    ports:
+      - 4000:4000/tcp
+    networks:
+      - overlay
+
+networks:
+  overlay:
