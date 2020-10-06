@@ -1,55 +1,25 @@
-import dotenv from 'dotenv'
-import express, { Request } from 'express'
-import cors from 'cors'
-import bodyParser from 'body-parser'
-import { fileService } from './services/fileService'
-import { mumbleClient } from './services/mumbleService'
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import { Config } from './config';
+import { soundsHandler } from './handlers/sounds';
+import { channelsHandler } from './handlers/channels';
+import { playSoundHandler } from './handlers/play-sound';
+import { ErrorMiddleware } from './middlewares/ErrorMiddleware';
+import { NotFoundMiddleware } from './middlewares/NotFoundMiddleware';
 
-dotenv.config()
+const app = express();
 
-const port = process.env.PORT
-const corsOptions = {
-    origin: 'http://localhost.com:3000',
-    optionsSuccessStatus: 200,
-}
-
-const app = express()
-app.use(cors())
-app.use(bodyParser.json())
-
-app.get('/channels', (_, res) => {
-    res.json(mumbleClient.getChannels())
-})
-
-app.get('/sounds', async (_, res) => {
-    try {
-        const sounds = await fileService.listSounds()
-        res.json(sounds)
-    } catch (err) {
-        res.json({ err })
-    }
-})
-
-app.post(
-    '/play-sound',
-    async (req: Request<{}, {}, { soundName: string }>, res) => {
-        try {
-            if (
-                !(await fileService.listSounds()).includes(req.body.soundName)
-            ) {
-                throw 'File not found'
-            }
-            mumbleClient.playSong(
-                `${process.env.AUDIO_PATH}/${req.body.soundName}`
-            )
-            res.json({ audio: true })
-        } catch (err) {
-            console.log(err)
-            res.status(500).json({ message: 'Problem', error: err })
-        }
-    }
-)
-
-app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`)
-})
+app
+  .use(cors())
+  .use(bodyParser.json())
+  .get('/sounds', soundsHandler)
+  .get('/channels', channelsHandler)
+  .post('/play-sound', playSoundHandler)
+  .use(NotFoundMiddleware)
+  .use(ErrorMiddleware)
+  .listen(Config.port, () => {
+    console.log(
+      `Example app listening at http://${Config.hostname}:${Config.port}`
+    );
+  });

@@ -1,15 +1,14 @@
-import fs from 'fs'
+import fs from 'fs';
+import { Config } from '../config';
 
-const audioPath = process.env.AUDIO_PATH || ''
+const hasAudioExtension = (file: string) =>
+  file.match(/\.(?:wav|mp3)$/i);
 
-const filterFormat = (files: string[]) =>
-    files.filter((file) => file.match(/\.(?:wav|mp3)$/i))
-
-const listSounds = async () =>
-    filterFormat(
-        await fs.promises.readdir(audioPath, {})
-    )
+const listSounds = async () => {
+  const files = await fs.promises.readdir(Config.audioPath, {});
+  return files.filter(hasAudioExtension);
+};
 
 export const fileService = {
-    listSounds,
-}
+  listSounds,
+};
