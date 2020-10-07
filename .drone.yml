@@ -37,7 +37,7 @@ steps:
 
   # drone-gke docs:
   # https://github.com/nytimes/drone-gke/blob/master/DOCS.md
-  - name: deploy-gke
+  - name: promote-to-production 
     image: nytimes/drone-gke
     environment:
       TOKEN:
@@ -57,6 +57,26 @@ steps:
     when:
       event:
       - promote
+      target:
+      - production
+
+  - name: rollback-production
+    image: google/cloud-sdk:alpine
+    environment:
+      SERVICE_ACCOUNT:
+        from_secret: gke_service_account
+      GOOGLE_APPLICATION_CREDENTIALS: /drone/src/gke-service-account.json
+    commands:
+      - echo $SERVICE_ACCOUNT > $GOOGLE_APPLICATION_CREDENTIALS
+      - gcloud components install kubectl
+      - gcloud config set project prismatic-petal-263719
+      - gcloud config set compute/zone us-central1-c
+      - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+      - gcloud container clusters get-credentials main-cluster
+      - kubectl rollout undo deployment/muminst-server
+    when:
+      event:
+      - rollback
       target:
       - production
 
