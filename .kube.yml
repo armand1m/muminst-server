@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: muminst-server
+  namespace: default
 spec:
   replicas: 1
   strategy:
@@ -51,6 +52,7 @@ spec:
 ---
 apiVersion: v1
 kind: Service
+namespace: default
 metadata:
   name: muminst-server
   labels:
@@ -68,6 +70,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: muminst-server 
+  namespace: default
 spec:
   host: muminst-server
   trafficPolicy:
@@ -79,6 +82,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: muminst-server
+  namespace: default
 spec:
   hosts:
   - muminst-server.d1m.dev
