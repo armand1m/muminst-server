@@ -11,6 +11,9 @@ steps:
         from_secret: docker_username
       password:
         from_secret: docker_password
+    when:
+      event:
+      - pull_request
 
   # drone-gke docs:
   # https://github.com/nytimes/drone-gke/blob/master/DOCS.md
