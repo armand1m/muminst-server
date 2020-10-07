@@ -52,9 +52,9 @@ spec:
 ---
 apiVersion: v1
 kind: Service
-namespace: default
 metadata:
   name: muminst-server
+  namespace: default
   labels:
     app: muminst-server
 spec:
