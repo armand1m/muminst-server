@@ -1,5 +1,5 @@
 FROM node:10-alpine AS builder
-RUN apk add --no-cache build-base python3 opus
+RUN apk add --no-cache build-base python3 opus git
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn
