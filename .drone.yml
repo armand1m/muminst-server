@@ -9,10 +9,8 @@ steps:
       tag: ${DRONE_COMMIT_SHA}
       dry_run: true
     when:
-      event: push
-      branch:
-        exclude:
-          - master
+      event:
+        - pull_request
   - name: build-and-push 
     image: plugins/docker
     settings:
