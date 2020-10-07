@@ -59,3 +59,13 @@ steps:
       - promote
       target:
       - production
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/pull/**
+  event:
+  - push
+  - pull_request
+  - promote
+  - rollback
