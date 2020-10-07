@@ -18,6 +18,9 @@ steps:
       event:
       - push
       - pull_request
+      - promote
+      target:
+      - production
 
   - name: build-and-push-pr 
     image: plugins/docker
