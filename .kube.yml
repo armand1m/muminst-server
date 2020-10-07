@@ -24,7 +24,7 @@ spec:
       containers:
       - image: {{.image}}
         imagePullPolicy: IfNotPresent
-        name: {{.app}}
+        name: muminst-server 
         ports:
         - containerPort: 4000
         env:
