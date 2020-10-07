@@ -12,14 +12,20 @@ steps:
     - git clone ${DRONE_GIT_HTTP_URL} .
     - git checkout ${DRONE_COMMIT}
     when:
+      ref:
+      - refs/heads/master
+      - refs/pull/**
       event:
+      - push
       - pull_request
 
-  - name: build-and-push 
+  - name: build-and-push-pr 
     image: plugins/docker
     settings:
       repo: armand1m/muminst-server
-      tag: ${DRONE_COMMIT_SHA}
+      tags:
+        - pr-${DRONE_BUILD_NUMBER}
+        - ${DRONE_COMMIT_SHA}
       username:
         from_secret: docker_username
       password:
@@ -27,6 +33,23 @@ steps:
     when:
       event:
       - pull_request
+
+  - name: build-and-push-master
+    image: plugins/docker
+    settings:
+      repo: armand1m/muminst-server
+      tags:
+        - latest
+        - ${DRONE_COMMIT_SHA}
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    when:
+      branch:
+      - master
+      event:
+      - push
 
   # drone-gke docs:
   # https://github.com/nytimes/drone-gke/blob/master/DOCS.md
