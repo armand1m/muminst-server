@@ -2,11 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import createHttpError from 'http-errors';
 import HttpStatusCodes from 'http-status-codes';
 import { fileService } from '../services/fileService';
-import { mumbleClient } from '../services/mumbleService';
 
 type WithBody<B extends object> = Request<{}, {}, B>;
 
-export const playSoundHandler = async (
+export const playSoundHandler = (mumbleClient: any) => async (
   req: WithBody<{ soundName: string }>,
   res: Response,
   next: NextFunction
@@ -20,7 +19,14 @@ export const playSoundHandler = async (
         'Sound is not available.'
       );
     }
+    console.log(mumbleClient.client.connection.writeProto);
 
+    mumbleClient.client.connection
+      .writeProto('User', {
+        channel: 2,
+      })
+      .then((e: any) => console.log('then', e))
+      .catch((e: any) => console.error('err', e));
     mumbleClient.playFile(
       `${process.env.AUDIO_PATH}/${req.body.soundName}`
     );

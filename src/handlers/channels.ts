@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { mumbleClient } from '../services/mumbleService';
 
-export const channelsHandler = async (
+export const channelsHandler = (mumbleClient: any) => async (
   _req: Request,
   res: Response
 ) => {
