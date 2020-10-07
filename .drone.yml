@@ -24,7 +24,7 @@ steps:
     settings:
       repo: armand1m/muminst-server
       tags:
-        - pr-${DRONE_BUILD_NUMBER}
+        - pr-${DRONE_PULL_REQUEST}
         - ${DRONE_COMMIT_SHA}
       username:
         from_secret: docker_username
