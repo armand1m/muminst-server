@@ -10,7 +10,7 @@ steps:
     image: alpine/git
     commands:
     - git clone ${DRONE_GIT_HTTP_URL} .
-    - git checkout ${DRONE_COMMIT} -b ${DRONE_REPO_BRANCH}
+    - git checkout ${DRONE_COMMIT}
     when:
       ref:
       - refs/heads/master
