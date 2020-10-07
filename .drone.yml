@@ -2,7 +2,17 @@ kind: pipeline
 type: kubernetes
 name: Build and Deploy
 steps:
-  - name: docker  
+  - name: build-only
+    image: plugins/docker
+    settings:
+      repo: armand1m/muminst-server
+      tag: ${DRONE_COMMIT_SHA}
+    when:
+      event: push
+      branch:
+        exclude:
+          - master
+  - name: build-and-push 
     image: plugins/docker
     settings:
       repo: armand1m/muminst-server
@@ -11,6 +21,9 @@ steps:
         from_secret: docker_username
       password:
         from_secret: docker_password
+    when:
+      event: push
+      branch: master
   # drone-gke docs:
   # https://github.com/nytimes/drone-gke/blob/master/DOCS.md
   - name: deploy-gke
