@@ -1,34 +1,61 @@
 kind: pipeline
 type: kubernetes
-name: "Build Docker Image"
+name: Muminst Server Pipeline
+
 steps:
-- name: docker  
-  image: plugins/docker
-  settings:
-    repo: armand1m/muminst-server
-    tag: ${DRONE_COMMIT_SHA}
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-# drone-gke docs: https://github.com/nytimes/drone-gke/blob/master/DOCS.md
-- name: deploy-gke
-  image: nytimes/drone-gke
-  environment:
-    TOKEN:
-      from_secret: gke_service_account
-  settings:
-    verbose: true
-    skip_template: false
-    skip_secret_template: true
-    cluster: main-cluster
-    zone: us-central1-c
-    project: prismatic-petal-263719
-    namespace: default
-    wait_deployments:
-    - deployment/muminst-server
-    vars:
-      image: armand1m/muminst-server:${DRONE_COMMIT_SHA}
-  when:
-    event: push
-    branch: master
+  - name: build-and-push-pr 
+    image: plugins/docker
+    settings:
+      repo: armand1m/muminst-server
+      tags:
+        - pr-${DRONE_PULL_REQUEST}
+        - ${DRONE_COMMIT_SHA}
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    when:
+      event:
+      - pull_request
+
+  - name: build-and-push-master
+    image: plugins/docker
+    settings:
+      repo: armand1m/muminst-server
+      tags:
+        - latest
+        - ${DRONE_COMMIT_SHA}
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    when:
+      branch:
+      - master
+      event:
+      - push
+
+  # drone-gke docs:
+  # https://github.com/nytimes/drone-gke/blob/master/DOCS.md
+  - name: deploy-gke
+    image: nytimes/drone-gke
+    environment:
+      TOKEN:
+        from_secret: gke_service_account
+    settings:
+      verbose: true
+      skip_template: false
+      skip_secret_template: true
+      cluster: main-cluster
+      zone: us-central1-c
+      project: prismatic-petal-263719
+      namespace: default
+      wait_deployments:
+        - deployment/muminst-server
+      vars:
+        image: armand1m/muminst-server:${DRONE_COMMIT_SHA}
+    when:
+      event:
+      - promote
+      target:
+      - production
