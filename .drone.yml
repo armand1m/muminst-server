@@ -2,26 +2,7 @@ kind: pipeline
 type: kubernetes
 name: Muminst Server Pipeline
 
-clone:
-  disable: true
-
 steps:
-  - name: clone
-    image: alpine/git
-    commands:
-    - git clone ${DRONE_GIT_HTTP_URL} .
-    - git checkout ${DRONE_COMMIT}
-    when:
-      ref:
-      - refs/heads/master
-      - refs/pull/**
-      event:
-      - push
-      - pull_request
-      - promote
-      target:
-      - production
-
   - name: build-and-push-pr 
     image: plugins/docker
     settings:
