@@ -5,6 +5,8 @@ import { fileService } from '../services/fileService';
 
 type WithBody<B extends object> = Request<{}, {}, B>;
 
+let lock = false;
+
 export const playSoundHandler = (mumbleClient: any) => async (
   req: WithBody<{ soundName: string }>,
   res: Response,
@@ -19,19 +21,23 @@ export const playSoundHandler = (mumbleClient: any) => async (
         'Sound is not available.'
       );
     }
-    console.log(mumbleClient.client.connection.writeProto);
+    const client = mumbleClient.client;
 
-    mumbleClient.client.connection
-      .writeProto('User', {
-        channel: 2,
-      })
-      .then((e: any) => console.log('then', e))
-      .catch((e: any) => console.error('err', e));
-    mumbleClient.playFile(
+    if (lock) {
+      res.json({ success: false });
+      return;
+    }
+
+    client.voiceConnection.on('end', (a: any) => {
+      lock = false;
+    });
+
+    client.voiceConnection.playFile(
       `${process.env.AUDIO_PATH}/${req.body.soundName}`
     );
+    lock = true;
 
-    res.json({ audio: true });
+    res.json({ success: true });
   } catch (err) {
     next(err);
   }
