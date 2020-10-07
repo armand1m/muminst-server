@@ -6,8 +6,7 @@ steps:
   image: plugins/docker
   settings:
     repo: armand1m/muminst-server
-    auto_tag: true
-    auto_tag_suffix: linux-amd64
+    tag: ${DRONE_COMMIT_SHA}
     username:
       from_secret: docker_username
     password:
