@@ -24,6 +24,7 @@ steps:
     cluster: main-cluster
     zone: us-central1-c
     project: prismatic-petal-263719
+    namespace: default
     wait_deployments:
     - deployment/muminst-server
     vars:
