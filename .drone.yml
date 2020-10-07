@@ -7,6 +7,7 @@ steps:
     settings:
       repo: armand1m/muminst-server
       tag: ${DRONE_COMMIT_SHA}
+      dry_run: true
     when:
       event: push
       branch:
