@@ -1,16 +1,7 @@
 kind: pipeline
 type: kubernetes
-name: Build and Deploy
+name: Muminst Server Pipeline 
 steps:
-  - name: build-only
-    image: plugins/docker
-    settings:
-      repo: armand1m/muminst-server
-      tag: ${DRONE_COMMIT_SHA}
-      dry_run: true
-    when:
-      event:
-        - pull_request
   - name: build-and-push 
     image: plugins/docker
     settings:
@@ -20,9 +11,7 @@ steps:
         from_secret: docker_username
       password:
         from_secret: docker_password
-    when:
-      event: push
-      branch: master
+
   # drone-gke docs:
   # https://github.com/nytimes/drone-gke/blob/master/DOCS.md
   - name: deploy-gke
@@ -43,5 +32,7 @@ steps:
       vars:
         image: armand1m/muminst-server:${DRONE_COMMIT_SHA}
     when:
-      event: push
-      branch: master
+      event:
+      - promote
+      target:
+      - production
