@@ -2,3 +2,4 @@ node_modules
 audio
 .env
 build
+.gcloud-credentials

@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: muminst-server
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: muminst-server
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: muminst-server 
+        version: v1
+    spec:
+      volumes:
+      - name: muminst-server-disk
+        gcePersistentDisk:
+          pdName: muminst-server-disk
+          fsType: ext4
+      containers:
+      - image: {{.image}}
+        imagePullPolicy: IfNotPresent
+        name: {{.app}}
+        ports:
+        - containerPort: 4000
+        env:
+        - name: HOSTNAME
+          value: muminst-server.d1m.dev
+        - name: PORT
+          value: "4000"
+        - name: MUMBLE_URL
+          value: intruder.network
+        - name: MUMBLE_USERNAME
+          value: InstantButtonBotKubernetes
+        - name: AUDIO_PATH
+          value: /app/audio
+        - name: NODE_ENV
+          value: production
+        resources:
+          requests:
+            cpu: 15m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /app/audio
+          name: muminst-server-disk
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: muminst-server
+  labels:
+    app: muminst-server
+spec:
+  ports:
+  - name: http
+    port: 4000
+    targetPort: 4000
+  selector:
+    app: muminst-server
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: muminst-server 
+spec:
+  host: muminst-server
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: muminst-server
+spec:
+  hosts:
+  - muminst-server.d1m.dev
+  - muminst-server.armand1m.dev
+  gateways:
+  - ingressgateway-workload
+  http:
+  - match:
+    - port: 443
+    route:
+    - destination:
+        host: muminst-server
+        port:
+          number: 4000
