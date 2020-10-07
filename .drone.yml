@@ -75,6 +75,7 @@ steps:
       - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
       - gcloud container clusters get-credentials main-cluster
       - kubectl rollout undo deployment.v1.apps/muminst-server --namespace=default
+      - kubectl rollout status deployment.v1.apps/muminst-server --namespace default
     when:
       event:
       - rollback

@@ -4,3 +4,12 @@ build
 Dockerfile
 audio
 .env.example
+.drone.yml
+.kube.yml
+.editorconfig
+.prettierrc
+README.md
+scripts
+.gcloud-credentials
+.git
+.gitignore
