@@ -1,7 +1,6 @@
 kind: pipeline
 type: kubernetes
-name: Muminst Server Pipeline
-
+name: Muminst Build Pipeline
 steps:
   - name: build-and-push-pr 
     image: plugins/docker
@@ -37,7 +36,7 @@ steps:
 
   # drone-gke docs:
   # https://github.com/nytimes/drone-gke/blob/master/DOCS.md
-  - name: promote-to-production 
+  - name: promote-master-to-production 
     image: nytimes/drone-gke
     environment:
       TOKEN:
@@ -55,12 +54,12 @@ steps:
       vars:
         image: armand1m/muminst-server:${DRONE_COMMIT_SHA}
     when:
+      branch:
+      - master
       event:
-      - promote
-      target:
-      - production
+      - push
 
-  - name: rollback-production
+  - name: rollback-master-if-failed
     image: google/cloud-sdk:alpine
     environment:
       SERVICE_ACCOUNT:
@@ -77,10 +76,12 @@ steps:
       - kubectl rollout undo deployment.v1.apps/muminst-server --namespace=default
       - kubectl rollout status deployment.v1.apps/muminst-server --namespace default
     when:
+      branch:
+      - master
       event:
-      - rollback
-      target:
-      - production
+      - push
+      status:
+      - failure
 
 trigger:
   ref:
@@ -89,5 +90,61 @@ trigger:
   event:
   - push
   - pull_request
+
+---
+kind: pipeline
+type: kubernetes
+name: Muminst Deployment Pipeline
+steps:
+- name: promote-to-production 
+  image: nytimes/drone-gke
+  environment:
+    TOKEN:
+      from_secret: gke_service_account
+  settings:
+    verbose: true
+    skip_template: false
+    skip_secret_template: true
+    cluster: main-cluster
+    zone: us-central1-c
+    project: prismatic-petal-263719
+    namespace: default
+    wait_deployments:
+      - deployment/muminst-server
+    vars:
+      image: armand1m/muminst-server:${DRONE_COMMIT_SHA}
+  when:
+    event:
+    - promote
+    target:
+    - production
+
+- name: rollback-production
+  image: google/cloud-sdk:alpine
+  environment:
+    SERVICE_ACCOUNT:
+      from_secret: gke_service_account
+    GOOGLE_APPLICATION_CREDENTIALS: /drone/src/gke-service-account.json
+    CLOUDSDK_CORE_DISABLE_PROMPTS: "1"
+  commands:
+    - echo $SERVICE_ACCOUNT > $GOOGLE_APPLICATION_CREDENTIALS
+    - gcloud components install kubectl
+    - gcloud config set project prismatic-petal-263719
+    - gcloud config set compute/zone us-central1-c
+    - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+    - gcloud container clusters get-credentials main-cluster
+    - kubectl rollout undo deployment.v1.apps/muminst-server --namespace=default
+    - kubectl rollout status deployment.v1.apps/muminst-server --namespace default
+  when:
+    event:
+    - rollback
+    target:
+    - production
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/pull/**
+  event:
   - promote
   - rollback
