@@ -66,6 +66,7 @@ steps:
       SERVICE_ACCOUNT:
         from_secret: gke_service_account
       GOOGLE_APPLICATION_CREDENTIALS: /drone/src/gke-service-account.json
+      CLOUDSDK_CORE_DISABLE_PROMPTS: "1"
     commands:
       - echo $SERVICE_ACCOUNT > $GOOGLE_APPLICATION_CREDENTIALS
       - gcloud components install kubectl
@@ -73,7 +74,7 @@ steps:
       - gcloud config set compute/zone us-central1-c
       - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
       - gcloud container clusters get-credentials main-cluster
-      - kubectl rollout undo deployment/muminst-server
+      - kubectl rollout undo deployment.v1.apps/muminst-server --namespace=default
     when:
       event:
       - rollback
