@@ -20,6 +20,7 @@
   "scripts": {
     "start": "ts-node ./src/main.ts",
     "build": "tsc",
+    "test": "jest",
     "lint": "prettier --check './src/**/*.{tsx,ts}'",
     "lint:fix": "prettier --write './src/**/*.{tsx,ts}'"
   },

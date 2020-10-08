@@ -3,3 +3,4 @@ audio
 .env
 build
 data/db.json
+.gcloud-credentials
