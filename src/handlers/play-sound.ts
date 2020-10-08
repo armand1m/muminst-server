@@ -1,26 +1,37 @@
 import { Request, Response, NextFunction } from 'express';
 import createHttpError from 'http-errors';
 import HttpStatusCodes from 'http-status-codes';
-import { fileService } from '../services/fileService';
+import { db } from '../db';
+import { buildFilePath } from '../util/buildFilePath';
 
 type WithBody<B extends object> = Request<{}, {}, B>;
 
 let lock = false;
 
 export const playSoundHandler = (mumbleClient: any) => async (
-  req: WithBody<{ soundName: string }>,
+  req: WithBody<{ soundId: string }>,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const sounds = await fileService.listSounds();
+    const { soundId } = req.body;
 
-    if (!sounds.includes(req.body.soundName)) {
+    if (!soundId) {
+      throw createHttpError(
+        HttpStatusCodes.BAD_REQUEST,
+        'Bad soundId.'
+      );
+    }
+
+    const sound = db.sounds.get(soundId);
+
+    if (!sound) {
       throw createHttpError(
         HttpStatusCodes.BAD_REQUEST,
         'Sound is not available.'
       );
     }
+
     const client = mumbleClient.client;
 
     if (lock) {
@@ -32,9 +43,8 @@ export const playSoundHandler = (mumbleClient: any) => async (
       lock = false;
     });
 
-    client.voiceConnection.playFile(
-      `${process.env.AUDIO_PATH}/${req.body.soundName}`
-    );
+    client.voiceConnection.playFile(buildFilePath(sound));
+
     lock = true;
 
     res.json({ success: true });

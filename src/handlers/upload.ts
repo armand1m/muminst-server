@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
-import { db, filePath, makeSound } from '../db';
+import { db } from '../db';
+import { makeSound } from '../model/Sound';
+import { buildFilePath } from '../util/buildFilePath';
 
 export const uploadHandler = async (req: Request, res: Response) => {
   if (!req.files || Object.keys(req.files).length === 0) {
@@ -11,7 +13,7 @@ export const uploadHandler = async (req: Request, res: Response) => {
       const sound = makeSound(file.name);
       try {
         db.sounds.add(sound);
-        await file.mv(filePath(sound));
+        await file.mv(buildFilePath(sound));
         return { error: false };
       } catch (err) {
         return { error: true };

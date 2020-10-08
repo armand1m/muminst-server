@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { fileService } from '../services/fileService';
+import { db } from '../db';
 
 export const soundsHandler = async (
   _req: Request,
@@ -7,8 +7,7 @@ export const soundsHandler = async (
   next: NextFunction
 ) => {
   try {
-    const sounds = await fileService.listSounds();
-    res.json(sounds);
+    res.json(db.sounds.list());
   } catch (err) {
     next(err);
   }
