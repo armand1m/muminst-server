@@ -16,7 +16,7 @@ getMumbleClient()
     const app = express();
     app
       .use(cors())
-      .use(fileUpload)
+      .use(fileUpload())
       .use(bodyParser.json())
       .get('/sounds', soundsHandler)
       .get('/channels', channelsHandler(mumbleClient))

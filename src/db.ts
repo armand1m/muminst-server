@@ -30,10 +30,11 @@ type Sound = {
   name: string;
   id: string;
   extension: string;
+  fileHash: string;
 };
 
 const splitFileName = (fileName: string) => {
-  const FILENAME_REGEX = /(.*)\.([a-zA-Z0-9])/;
+  const FILENAME_REGEX = /(.*)\.([a-zA-Z0-9]+)/;
   const matches = fileName.match(FILENAME_REGEX);
   if (!matches || matches.length < 3) {
     console.error({ fileName, matches });
@@ -45,14 +46,16 @@ const splitFileName = (fileName: string) => {
 
 export const makeSound = (fileName: string): Sound => {
   const uuid = createUUID();
+  const fileHash = createUUID();
   const { name, extension } = splitFileName(fileName);
 
   return {
     name,
     extension,
+    fileHash,
     id: uuid,
   };
 };
 
 export const filePath = (sound: Sound) =>
-  `${Config.audioPath}/${sound.id}.${sound.extension}`;
+  `${Config.audioPath}/${sound.fileHash}.${sound.extension}`;
