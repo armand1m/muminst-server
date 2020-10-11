@@ -2,24 +2,30 @@ import { Request, Response, NextFunction } from 'express';
 import createHttpError from 'http-errors';
 import HttpStatusCodes from 'http-status-codes';
 import { db } from '../db';
+import { MumbleClient } from '../services/mumbleService';
 import { buildFilePath } from '../util/buildFilePath';
 
 type WithBody<B extends object> = Request<{}, {}, B>;
 
-let lock = false;
-
-export const playSoundHandler = (mumbleClient: any) => async (
+export const playSoundHandler = (
+  mumbleClient: MumbleClient
+) => async (
   req: WithBody<{ soundId: string }>,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    if (mumbleClient.isLocked) {
+      res.json({ success: false });
+      return;
+    }
+
     const { soundId } = req.body;
 
     if (!soundId) {
       throw createHttpError(
         HttpStatusCodes.BAD_REQUEST,
-        'Bad soundId.'
+        'The soundId property is required in the payload.'
       );
     }
 
@@ -27,25 +33,12 @@ export const playSoundHandler = (mumbleClient: any) => async (
 
     if (!sound) {
       throw createHttpError(
-        HttpStatusCodes.BAD_REQUEST,
-        'Sound is not available.'
+        HttpStatusCodes.NOT_FOUND,
+        `Sound with soundId "${soundId}" does not exist.`
       );
     }
 
-    const client = mumbleClient.client;
-
-    if (lock) {
-      res.json({ success: false });
-      return;
-    }
-
-    client.voiceConnection.on('end', (a: any) => {
-      lock = false;
-    });
-
-    client.voiceConnection.playFile(buildFilePath(sound));
-
-    lock = true;
+    mumbleClient.playFile(buildFilePath(sound));
 
     res.json({ success: true });
   } catch (err) {

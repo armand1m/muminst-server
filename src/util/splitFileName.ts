@@ -1,10 +1,13 @@
+import path from 'path';
+
 export const splitFileName = (fileName: string) => {
-  const FILENAME_REGEX = /(.*)\.([a-zA-Z0-9]+)/;
-  const matches = fileName.match(FILENAME_REGEX);
-  if (!matches || matches.length < 3) {
-    console.error({ fileName, matches });
-    throw new Error('Error while parsing filename');
+  try {
+    const extension = path.extname(fileName);
+    const name = path.basename(fileName, extension);
+
+    return { name, extension };
+  } catch (err) {
+    console.error(err);
+    throw new Error(`Failed to parse filename: "${fileName}"`);
   }
-  const [, name, extension] = matches;
-  return { name, extension };
 };

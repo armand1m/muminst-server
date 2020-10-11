@@ -1,9 +1,13 @@
+import path from 'path';
+import { omit } from 'ramda';
 import low from 'lowdb';
 import FileSync from 'lowdb/adapters/FileSync';
-import R from 'ramda';
 import { Sound } from './model/Sound';
+import { Config } from './config';
 
-const adapter = new FileSync('./data/db.json');
+const databaseFilePath = path.resolve(Config.audioPath, 'db.json');
+
+const adapter = new FileSync(databaseFilePath);
 
 type State = {
   sounds: Sound[];
@@ -18,7 +22,7 @@ export const db = {
     list: () =>
       _db
         .get('sounds')
-        .map(R.omit(['fileHash']))
+        .map(omit(['fileHash']))
         .value(),
 
     get: (id: string) => _db.get('sounds').find({ id }).value(),

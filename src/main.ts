@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import fileUpload from 'express-fileupload';
 import { Config } from './config';
 import { soundsHandler } from './handlers/sounds';
 import { channelsHandler } from './handlers/channels';
@@ -8,7 +9,6 @@ import { playSoundHandler } from './handlers/play-sound';
 import { ErrorMiddleware } from './middlewares/ErrorMiddleware';
 import { NotFoundMiddleware } from './middlewares/NotFoundMiddleware';
 import { getMumbleClient } from './services/mumbleService';
-import fileUpload from 'express-fileupload';
 import { uploadHandler } from './handlers/upload';
 
 getMumbleClient()
@@ -26,7 +26,7 @@ getMumbleClient()
       .use(ErrorMiddleware)
       .listen(Config.port, () => {
         console.log(
-          `Example app listening at http://${Config.hostname}:${Config.port}`
+          `Muminst server listening at ${Config.proto}://${Config.hostname}:${Config.port}`
         );
       });
   })

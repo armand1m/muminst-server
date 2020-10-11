@@ -1,14 +1,30 @@
 require('dotenv').config();
 import * as yup from 'yup';
 
-const createRequiredErrMessage = (envVar: string) =>
-  `${envVar} environment variable is required.`;
+const createRequiredErrMessage = (
+  envVar: string,
+  possibleValues?: string[]
+) => {
+  const initialMessage = `${envVar} environment variable is required.`;
+
+  if (!possibleValues || possibleValues.length === 0) {
+    return initialMessage;
+  }
+
+  return `${initialMessage} Use one of the possible values: ${possibleValues.join(
+    ', '
+  )}`;
+};
 
 const schema = yup.object({
   hostname: yup
     .string()
     .required(createRequiredErrMessage('HOSTNAME')),
   port: yup.number().required(createRequiredErrMessage('PORT')),
+  proto: yup
+    .string()
+    .oneOf(['http', 'https'])
+    .required(createRequiredErrMessage('PROTO', ['http', 'https'])),
   audioPath: yup
     .string()
     .required(createRequiredErrMessage('AUDIO_PATH')),
@@ -24,6 +40,7 @@ const createConfig = () => {
   const config = {
     hostname: process.env.HOSTNAME ?? '0.0.0.0',
     port: Number(process.env.PORT) ?? 4000,
+    proto: process.env.PROTO,
     audioPath: process.env.AUDIO_PATH,
     mumbleUrl: process.env.MUMBLE_URL,
     mumbleUserName: process.env.MUMBLE_USERNAME,

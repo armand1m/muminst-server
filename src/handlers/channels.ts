@@ -1,8 +1,14 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import { MumbleClient } from '../services/mumbleService';
 
-export const channelsHandler = (mumbleClient: any) => async (
+export const channelsHandler = (mumbleClient: MumbleClient) => async (
   _req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
-  res.json(mumbleClient.getChannels());
+  try {
+    res.json(mumbleClient.getChannels());
+  } catch (err) {
+    next(err);
+  }
 };
