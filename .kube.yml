@@ -29,6 +29,8 @@ spec:
         ports:
         - containerPort: 4000
         env:
+        - name: PROTO
+          value: https
         - name: HOSTNAME
           value: muminst-server.d1m.dev
         - name: PORT
@@ -37,8 +39,10 @@ spec:
           value: intruder.network
         - name: MUMBLE_USERNAME
           value: InstantButtonBotKubernetes
+        - name: DB_PATH
+          value: /app/data/db
         - name: AUDIO_PATH
-          value: /app/audio
+          value: /app/data/audio
         - name: NODE_ENV
           value: production
         resources:
@@ -46,7 +50,7 @@ spec:
             cpu: 15m
             memory: 100Mi
         volumeMounts:
-        - mountPath: /app/audio
+        - mountPath: /app/data
           name: muminst-server-disk
 
 ---

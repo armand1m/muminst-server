@@ -11,25 +11,24 @@ import { NotFoundMiddleware } from './middlewares/NotFoundMiddleware';
 import { getMumbleClient } from './services/mumbleService';
 import { uploadHandler } from './handlers/upload';
 
-getMumbleClient()
-  .then((mumbleClient) => {
-    const app = express();
-    app
-      .use(cors())
-      .use(fileUpload())
-      .use(bodyParser.json())
-      .get('/sounds', soundsHandler)
-      .get('/channels', channelsHandler(mumbleClient))
-      .post('/play-sound', playSoundHandler(mumbleClient))
-      .post('/upload', uploadHandler)
-      .use(NotFoundMiddleware)
-      .use(ErrorMiddleware)
-      .listen(Config.port, () => {
-        console.log(
-          `Muminst server listening at ${Config.proto}://${Config.hostname}:${Config.port}`
-        );
-      });
-  })
-  .catch((err) => {
-    throw new Error(err);
-  });
+const main = async () => {
+  const mumbleClient = await getMumbleClient();
+
+  express()
+    .use(cors())
+    .use(fileUpload())
+    .use(bodyParser.json())
+    .get('/sounds', soundsHandler)
+    .get('/channels', channelsHandler(mumbleClient))
+    .post('/play-sound', playSoundHandler(mumbleClient))
+    .post('/upload', uploadHandler)
+    .use(NotFoundMiddleware)
+    .use(ErrorMiddleware)
+    .listen(Config.port, () => {
+      console.log(
+        `Muminst server listening at ${Config.proto}://${Config.hostname}:${Config.port}`
+      );
+    });
+};
+
+main();

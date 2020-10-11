@@ -25,6 +25,7 @@ const schema = yup.object({
     .string()
     .oneOf(['http', 'https'])
     .required(createRequiredErrMessage('PROTO', ['http', 'https'])),
+  dbPath: yup.string().required(createRequiredErrMessage('DB_PATH')),
   audioPath: yup
     .string()
     .required(createRequiredErrMessage('AUDIO_PATH')),
@@ -41,6 +42,7 @@ const createConfig = () => {
     hostname: process.env.HOSTNAME ?? '0.0.0.0',
     port: Number(process.env.PORT) ?? 4000,
     proto: process.env.PROTO,
+    dbPath: process.env.DB_PATH,
     audioPath: process.env.AUDIO_PATH,
     mumbleUrl: process.env.MUMBLE_URL,
     mumbleUserName: process.env.MUMBLE_USERNAME,

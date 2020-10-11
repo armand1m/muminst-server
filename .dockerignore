@@ -3,6 +3,7 @@ node_modules
 build
 Dockerfile
 audio
+data
 .env.example
 .drone.yml
 .kube.yml

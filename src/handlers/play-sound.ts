@@ -15,11 +15,6 @@ export const playSoundHandler = (
   next: NextFunction
 ) => {
   try {
-    if (mumbleClient.isLocked) {
-      res.json({ success: false });
-      return;
-    }
-
     const { soundId } = req.body;
 
     if (!soundId) {
@@ -36,6 +31,11 @@ export const playSoundHandler = (
         HttpStatusCodes.NOT_FOUND,
         `Sound with soundId "${soundId}" does not exist.`
       );
+    }
+
+    if (mumbleClient.isLocked()) {
+      res.json({ success: false });
+      return;
     }
 
     mumbleClient.playFile(buildFilePath(sound));

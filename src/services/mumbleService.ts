@@ -18,8 +18,18 @@ export interface MumbleClient {
   stop: () => void;
   setVolume: () => void;
   client: any;
-  isLocked: boolean;
+  isLocked: () => boolean;
 }
+
+let _isLocked = false;
+
+export const isLocked = () => {
+  return _isLocked;
+};
+
+const setLocked = (value: boolean) => {
+  _isLocked = value;
+};
 
 export const getMumbleClient = () =>
   new Promise<MumbleClient>((resolve) => {
@@ -27,12 +37,6 @@ export const getMumbleClient = () =>
       url: Config.mumbleUrl,
       name: Config.mumbleUserName,
     });
-
-    let isLocked = false;
-
-    const setLocked = (value: boolean) => {
-      isLocked = value;
-    };
 
     client.on('ready', () => {
       resolve({
