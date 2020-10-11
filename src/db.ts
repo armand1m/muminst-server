@@ -1,23 +1,48 @@
+import path from 'path';
+import { omit } from 'ramda';
 import low from 'lowdb';
+import mkdirp from 'mkdirp';
 import FileSync from 'lowdb/adapters/FileSync';
+import { Sound } from './model/Sound';
 import { Config } from './config';
-import { createUUID } from './uuid';
 
-const adapter = new FileSync('./data/db.json');
+console.log(`Creating "${Config.dbPath}" with "mkdir -p"`);
+mkdirp.sync(Config.dbPath);
+console.log(`Created ${Config.dbPath}`);
 
-type State = {
+console.log(`Creating "${Config.audioPath}" with "mkdir -p"`);
+mkdirp.sync(Config.audioPath);
+console.log(`Created ${Config.audioPath}`);
+
+const databaseFilePath = path.resolve(Config.dbPath, 'database.json');
+
+const adapter = new FileSync(databaseFilePath);
+
+interface State {
   sounds: Sound[];
-};
+}
 
-const _db = low<low.AdapterSync<State>>(adapter).defaults<State>({
-  sounds: [],
-});
+const _db = low<low.AdapterSync<State>>(adapter);
+
+_db
+  .defaults<State>({ sounds: [] })
+  .write();
 
 export const db = {
   sounds: {
-    list: () => _db.get('sounds').value(),
-    get: ({ id }: Sound) => _db.get('sounds').find({ id }).value(),
+    list: () =>
+      _db
+        .get('sounds')
+        .map(omit(['fileHash']))
+        .value(),
+
+    get: (id: string) => _db.get('sounds').find({ id }).value(),
+
+    getByFileHash: (fileHash: string) =>
+      _db.get('sounds').find({ fileHash }).value(),
+
     add: (sound: Sound) => _db.get('sounds').push(sound).write(),
+
     remove: ({ id }: Sound) =>
       _db
         .get('sounds')
@@ -25,34 +50,3 @@ export const db = {
         .write(),
   },
 };
-
-type Sound = {
-  name: string;
-  id: string;
-  extension: string;
-};
-
-const splitFileName = (fileName: string) => {
-  const FILENAME_REGEX = /(.*)\.([a-zA-Z0-9])/;
-  const matches = fileName.match(FILENAME_REGEX);
-  if (!matches || matches.length < 3) {
-    console.error({ fileName, matches });
-    throw new Error('Error while parsing filename');
-  }
-  const [, name, extension] = matches;
-  return { name, extension };
-};
-
-export const makeSound = (fileName: string): Sound => {
-  const uuid = createUUID();
-  const { name, extension } = splitFileName(fileName);
-
-  return {
-    name,
-    extension,
-    id: uuid,
-  };
-};
-
-export const filePath = (sound: Sound) =>
-  `${Config.audioPath}/${sound.id}.${sound.extension}`;

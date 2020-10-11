@@ -3,3 +3,4 @@ audio
 .env
 build
 .gcloud-credentials
+data
