@@ -38,6 +38,9 @@ export const db = {
 
     get: (id: string) => _db.get('sounds').find({ id }).value(),
 
+    getByFileHash: (fileHash: string) =>
+      _db.get('sounds').find({ fileHash }).value(),
+
     add: (sound: Sound) => _db.get('sounds').push(sound).write(),
 
     remove: ({ id }: Sound) =>

@@ -1,3 +1,5 @@
+import hasha from 'hasha';
+import { UploadedFile } from 'express-fileupload';
 import { createUUID } from '../util/createUUID';
 import { splitFileName } from '../util/splitFileName';
 
@@ -6,16 +8,23 @@ export type Sound = {
   id: string;
   extension: string;
   fileHash: string;
+  fileName: string;
 };
 
-export const makeSound = (fileName: string): Sound => {
+export const makeSound = async (
+  file: UploadedFile
+): Promise<Sound> => {
   const uuid = createUUID();
-  const fileHash = createUUID();
-  const { name, extension } = splitFileName(fileName);
+  const fileName = createUUID();
+  const fileHash = await hasha.async(file.data, {
+    algorithm: 'sha256',
+  });
+  const { name, extension } = splitFileName(file.name);
 
   return {
     name,
     extension,
+    fileName,
     fileHash,
     id: uuid,
   };

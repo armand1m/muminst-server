@@ -9,10 +9,6 @@ import { buildFilePath } from '../util/buildFilePath';
 /**
  * Upload Handler
  *
- * TODO:
- *
- * [ ] Create upload file hash so we can check if the file already exists in case it gets uploaded again.
- *
  * @param req
  * @param res
  * @param next
@@ -33,7 +29,18 @@ export const uploadHandler = async (
     const allFilesMove = await Promise.all(
       Object.values(req.files).map(async (file) => {
         try {
-          const sound = makeSound(file.name);
+          const sound = await makeSound(file);
+          const hashCheck = db.sounds.getByFileHash(sound.fileHash);
+
+          if (hashCheck) {
+            return {
+              status: 'error',
+              data: {
+                filename: file.name,
+                reason: `Sound already exists with sound name "${hashCheck.name}"`,
+              },
+            };
+          }
 
           await db.sounds.add(sound);
           await file.mv(buildFilePath(sound));
