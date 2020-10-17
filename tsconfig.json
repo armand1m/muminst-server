@@ -34,7 +34,7 @@
     "types": [
       "node",
       "jest"
-    ]
+    ],
   },
   "include": ["./src"],
   "exclude": [

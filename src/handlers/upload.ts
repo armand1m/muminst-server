@@ -23,13 +23,6 @@ const isValidFile = async (file: UploadedFile) => {
   );
 };
 
-/**
- * Upload Handler
- *
- * @param req
- * @param res
- * @param next
- */
 export const uploadHandler = async (
   req: Request,
   res: Response,

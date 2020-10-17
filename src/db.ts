@@ -6,15 +6,17 @@ import FileSync from 'lowdb/adapters/FileSync';
 import { Sound } from './model/Sound';
 import { Config } from './config';
 
-console.log(`Creating "${Config.dbPath}" with "mkdir -p"`);
-mkdirp.sync(Config.dbPath);
-console.log(`Created ${Config.dbPath}`);
+const { dbPath, audioPath } = Config.filesystem;
 
-console.log(`Creating "${Config.audioPath}" with "mkdir -p"`);
-mkdirp.sync(Config.audioPath);
-console.log(`Created ${Config.audioPath}`);
+console.log(`Creating "${dbPath}" with "mkdir -p"`);
+mkdirp.sync(dbPath);
+console.log(`Created ${dbPath}`);
 
-const databaseFilePath = path.resolve(Config.dbPath, 'database.json');
+console.log(`Creating "${audioPath}" with "mkdir -p"`);
+mkdirp.sync(audioPath);
+console.log(`Created ${audioPath}`);
+
+const databaseFilePath = path.resolve(dbPath, 'database.json');
 
 const adapter = new FileSync(databaseFilePath);
 
