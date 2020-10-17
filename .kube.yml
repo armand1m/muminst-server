@@ -36,13 +36,13 @@ spec:
         - name: PORT
           value: "4000"
         - name: MUMBLE_ENABLED
-          value: true
+          value: "true"
         - name: MUMBLE_URL
           value: intruder.network
         - name: MUMBLE_USERNAME
           value: InstantButtonBotKubernetes
         - name: DISCORD_ENABLED
-          value: true
+          value: "true"
         - name: DISCORD_BOT_TOKEN
           valueFrom:
             secretKeyRef:
