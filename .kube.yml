@@ -35,10 +35,19 @@ spec:
           value: muminst-server.d1m.dev
         - name: PORT
           value: "4000"
+        - name: MUMBLE_ENABLED
+          value: true
         - name: MUMBLE_URL
           value: intruder.network
         - name: MUMBLE_USERNAME
           value: InstantButtonBotKubernetes
+        - name: DISCORD_ENABLED
+          value: true
+        - name: DISCORD_BOT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: discord-secrets
+              key: bot_token
         - name: DB_PATH
           value: /app/data/db
         - name: AUDIO_PATH

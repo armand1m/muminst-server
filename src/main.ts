@@ -2,31 +2,47 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import fileUpload from 'express-fileupload';
-import { Config } from './config';
+import { Config, SupportedChatClient } from './config';
 import { soundsHandler } from './handlers/sounds';
-import { channelsHandler } from './handlers/channels';
-import { playSoundHandler } from './handlers/play-sound';
+import { playSoundHandler } from './handlers/playSound';
 import { ErrorMiddleware } from './middlewares/ErrorMiddleware';
 import { NotFoundMiddleware } from './middlewares/NotFoundMiddleware';
-import { getMumbleClient } from './services/mumbleService';
 import { uploadHandler } from './handlers/upload';
+import { ConfigMiddleware } from './middlewares/ConfigMiddleware';
+import { InjectClientMiddleware } from './middlewares/InjectClientMiddleware';
+import { getMumbleClient } from './services/mumble';
+import { getDiscordClient } from './services/discord';
+import { ChatClient } from './services/chatClient';
+
+const { proto, hostname, port } = Config.metadata;
 
 const main = async () => {
-  const mumbleClient = await getMumbleClient();
+  const clients: Record<
+    SupportedChatClient,
+    ChatClient | undefined
+  > = {
+    mumble: Config.features.mumble
+      ? await getMumbleClient(Config.mumble)
+      : undefined,
+    discord: Config.features.discord
+      ? await getDiscordClient(Config.discord)
+      : undefined,
+  };
 
   express()
     .use(cors())
     .use(fileUpload())
     .use(bodyParser.json())
+    .use(ConfigMiddleware)
+    .use(InjectClientMiddleware(clients))
     .get('/sounds', soundsHandler)
-    .get('/channels', channelsHandler(mumbleClient))
-    .post('/play-sound', playSoundHandler(mumbleClient))
+    .post('/play-sound', playSoundHandler)
     .post('/upload', uploadHandler)
     .use(NotFoundMiddleware)
     .use(ErrorMiddleware)
-    .listen(Config.port, () => {
+    .listen(port, () => {
       console.log(
-        `Muminst server listening at ${Config.proto}://${Config.hostname}:${Config.port}`
+        `Muminst server listening at ${proto}://${hostname}:${port}`
       );
     });
 };

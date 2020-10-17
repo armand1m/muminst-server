@@ -4,6 +4,6 @@ import { Sound } from '../model/Sound';
 
 export const buildFilePath = (sound: Sound) =>
   path.resolve(
-    Config.audioPath,
+    Config.filesystem.audioPath,
     `${sound.fileName}${sound.extension}`
   );

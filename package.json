@@ -1,10 +1,12 @@
 {
   "dependencies": {
+    "@discordjs/opus": "^0.3.2",
     "@types/express-fileupload": "^1.1.5",
     "@types/lowdb": "^1.0.9",
     "@types/ramda": "^0.27.20",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
+    "discord.js": "^12.3.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.0",
@@ -21,7 +23,7 @@
     "yup": "^0.29.3"
   },
   "scripts": {
-    "start": "ts-node ./src/main.ts",
+    "start": "ts-node --files ./src/main.ts",
     "build": "tsc",
     "test": "jest",
     "lint": "prettier --check './src/**/*.{tsx,ts}'",

@@ -1,4 +1,4 @@
-FROM node:10-alpine AS builder
+FROM node:12-alpine AS builder
 RUN apk add --no-cache build-base python3 opus git
 WORKDIR /app
 COPY package.json yarn.lock ./
@@ -6,7 +6,7 @@ RUN yarn
 COPY . .
 RUN yarn build
 
-FROM node:10-alpine
+FROM node:12-alpine
 RUN apk add --no-cache ffmpeg
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S muminst -u 1001

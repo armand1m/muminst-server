@@ -16,48 +16,129 @@ const createRequiredErrMessage = (
   )}`;
 };
 
+export type SupportedChatClient = 'mumble' | 'discord';
+
+export interface MumbleProperties {
+  url: string;
+  username: string;
+}
+
+export interface DiscordProperties {
+  token: string;
+}
+
 const schema = yup.object({
-  hostname: yup
-    .string()
-    .required(createRequiredErrMessage('HOSTNAME')),
-  port: yup.number().required(createRequiredErrMessage('PORT')),
-  proto: yup
-    .string()
-    .oneOf(['http', 'https'])
-    .required(createRequiredErrMessage('PROTO', ['http', 'https'])),
-  dbPath: yup.string().required(createRequiredErrMessage('DB_PATH')),
-  audioPath: yup
-    .string()
-    .required(createRequiredErrMessage('AUDIO_PATH')),
-  mumbleUrl: yup
-    .string()
-    .required(createRequiredErrMessage('MUMBLE_URL')),
-  mumbleUserName: yup
-    .string()
-    .required(createRequiredErrMessage('MUMBLE_USERNAME')),
+  metadata: yup
+    .object({
+      hostname: yup
+        .string()
+        .required(createRequiredErrMessage('HOSTNAME')),
+      port: yup.number().required(createRequiredErrMessage('PORT')),
+      proto: yup
+        .string()
+        .oneOf(['http', 'https'])
+        .required(
+          createRequiredErrMessage('PROTO', ['http', 'https'])
+        ),
+    })
+    .required(),
+  filesystem: yup
+    .object({
+      dbPath: yup
+        .string()
+        .required(createRequiredErrMessage('DB_PATH')),
+      audioPath: yup
+        .string()
+        .required(createRequiredErrMessage('AUDIO_PATH')),
+    })
+    .required(),
+  features: yup
+    .object({
+      mumble: yup
+        .boolean()
+        .required(
+          createRequiredErrMessage('MUMBLE_ENABLED', [
+            'true',
+            'false',
+          ])
+        ),
+      discord: yup
+        .boolean()
+        .required(
+          createRequiredErrMessage('DISCORD_ENABLED', [
+            'true',
+            'false',
+          ])
+        ),
+    })
+    .required(),
+  mumble: yup
+    .object<MumbleProperties>()
+    .when('features.mumble', {
+      is: true,
+      then: yup
+        .object({
+          url: yup
+            .string()
+            .required(createRequiredErrMessage('MUMBLE_URL')),
+          username: yup
+            .string()
+            .required(createRequiredErrMessage('MUMBLE_USERNAME')),
+        })
+        .required(),
+      otherwise: yup.object().optional(),
+    })
+    .required(),
+  discord: yup
+    .object<DiscordProperties>()
+    .when('features.discord', {
+      is: true,
+      then: yup
+        .object({
+          token: yup
+            .string()
+            .required(createRequiredErrMessage('DISCORD_BOT_TOKEN')),
+        })
+        .required(),
+      otherwise: yup.object().optional(),
+    })
+    .required(),
 });
 
 const createConfig = () => {
-  const config = {
-    hostname: process.env.HOSTNAME ?? '0.0.0.0',
-    port: Number(process.env.PORT) ?? 4000,
-    proto: process.env.PROTO,
-    dbPath: process.env.DB_PATH,
-    audioPath: process.env.AUDIO_PATH,
-    mumbleUrl: process.env.MUMBLE_URL,
-    mumbleUserName: process.env.MUMBLE_USERNAME,
+  const unsafeConfig = {
+    metadata: {
+      hostname: process.env.HOSTNAME ?? '0.0.0.0',
+      port: Number(process.env.PORT) ?? 4000,
+      proto: process.env.PROTO,
+    },
+    filesystem: {
+      dbPath: process.env.DB_PATH,
+      audioPath: process.env.AUDIO_PATH,
+    },
+    features: {
+      mumble: process.env.MUMBLE_ENABLED === 'true',
+      discord: process.env.DISCORD_ENABLED === 'true',
+    },
+    mumble: {
+      url: process.env.MUMBLE_URL,
+      username: process.env.MUMBLE_USERNAME,
+    },
+    discord: {
+      token: process.env.DISCORD_BOT_TOKEN,
+    },
   };
 
   try {
-    const validatedConfig = schema.validateSync(config);
+    const config = schema.validateSync(unsafeConfig);
 
-    if (!validatedConfig) {
+    if (!config) {
       throw new Error(
         'Failed to validate environment configuration.'
       );
     }
 
-    return validatedConfig;
+    return config;
   } catch (err) {
     console.error(err);
     process.exit(1);
@@ -65,3 +146,5 @@ const createConfig = () => {
 };
 
 export const Config = createConfig();
+
+export type ConfigInterface = typeof Config;
