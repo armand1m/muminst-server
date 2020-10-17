@@ -10,7 +10,7 @@ import { buildFilePath } from '../util/buildFilePath';
 
 const isValidFile = async (file: UploadedFile) => {
   const mime = await fromBuffer(file.data);
-  return mime?.ext === "mp3" || mime?.mime === "audio/mpeg";
+  return mime?.ext === 'mp3' || mime?.mime === 'audio/mpeg';
 };
 
 /**
