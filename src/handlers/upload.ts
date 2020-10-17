@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { UploadedFile } from 'express-fileupload';
-import { fromBuffer } from 'file-type';
+import { FileTypeResult, fromBuffer } from 'file-type';
 import { isEmpty } from 'ramda';
 import createHttpError from 'http-errors';
 import HttpStatusCodes from 'http-status-codes';
@@ -8,9 +8,19 @@ import { db } from '../db';
 import { makeSound } from '../model/Sound';
 import { buildFilePath } from '../util/buildFilePath';
 
+const validExtensions: FileTypeResult['ext'][] = ['mp3', 'wav'];
+
 const isValidFile = async (file: UploadedFile) => {
-  const mime = await fromBuffer(file.data);
-  return mime?.ext === 'mp3' || mime?.mime === 'audio/mpeg';
+  const fileType = await fromBuffer(file.data);
+
+  if (!fileType) {
+    return false;
+  }
+
+  return (
+    validExtensions.includes(fileType.ext) ||
+    fileType.mime === 'audio/mpeg'
+  );
 };
 
 /**
