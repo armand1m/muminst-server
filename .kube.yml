@@ -35,6 +35,15 @@ spec:
           value: muminst-server.d1m.dev
         - name: PORT
           value: "4000"
+        - name: TELEGRAM_ENABLED
+          value: "true"
+        - name: TELEGRAM_BOT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: telegram-secrets
+              key: bot_token
+        - name: TELEGRAM_CHAT_ID
+          value: "-389514977"
         - name: MUMBLE_ENABLED
           value: "true"
         - name: MUMBLE_URL

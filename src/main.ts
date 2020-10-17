@@ -10,9 +10,10 @@ import { NotFoundMiddleware } from './middlewares/NotFoundMiddleware';
 import { uploadHandler } from './handlers/upload';
 import { ConfigMiddleware } from './middlewares/ConfigMiddleware';
 import { InjectClientMiddleware } from './middlewares/InjectClientMiddleware';
+import { ChatClient } from './services/chatClient';
 import { getMumbleClient } from './services/mumble';
 import { getDiscordClient } from './services/discord';
-import { ChatClient } from './services/chatClient';
+import { getTelegramClient } from './services/telegram';
 
 const { proto, hostname, port } = Config.metadata;
 
@@ -26,6 +27,9 @@ const main = async () => {
       : undefined,
     discord: Config.features.discord
       ? await getDiscordClient(Config.discord)
+      : undefined,
+    telegram: Config.features.telegram
+      ? await getTelegramClient(Config.telegram)
       : undefined,
   };
 

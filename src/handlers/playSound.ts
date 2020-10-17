@@ -43,8 +43,7 @@ export const playSoundHandler = async (
       );
     }
 
-    const chatClient =
-      client === 'mumble' ? req.clients.mumble : req.clients.discord;
+    const chatClient = req.clients[client];
 
     if (!chatClient) {
       throw createHttpError(
