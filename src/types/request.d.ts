@@ -4,6 +4,7 @@ declare namespace Express {
     clients: {
       mumble?: import('../services/chatClient').ChatClient;
       discord?: import('../services/chatClient').ChatClient;
+      telegram?: import('../services/chatClient').ChatClient;
     };
   }
 }

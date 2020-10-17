@@ -16,7 +16,7 @@ const createRequiredErrMessage = (
   )}`;
 };
 
-export type SupportedChatClient = 'mumble' | 'discord';
+export type SupportedChatClient = 'mumble' | 'discord' | 'telegram';
 
 export interface MumbleProperties {
   url: string;
@@ -25,6 +25,11 @@ export interface MumbleProperties {
 
 export interface DiscordProperties {
   token: string;
+}
+
+export interface TelegramProperties {
+  token: string;
+  chatId: string;
 }
 
 const schema = yup.object({
@@ -70,6 +75,14 @@ const schema = yup.object({
             'false',
           ])
         ),
+      telegram: yup
+        .boolean()
+        .required(
+          createRequiredErrMessage('TELEGRAM_ENABLED', [
+            'true',
+            'false',
+          ])
+        ),
     })
     .required(),
   mumble: yup
@@ -103,6 +116,23 @@ const schema = yup.object({
       otherwise: yup.object().optional(),
     })
     .required(),
+  telegram: yup
+    .object<TelegramProperties>()
+    .when('features.telegram', {
+      is: true,
+      then: yup
+        .object({
+          token: yup
+            .string()
+            .required(createRequiredErrMessage('TELEGRAM_BOT_TOKEN')),
+          chatId: yup
+            .string()
+            .required(createRequiredErrMessage('TELEGRAM_CHAT_ID')),
+        })
+        .required(),
+      otherwise: yup.object().optional(),
+    })
+    .required(),
 });
 
 const createConfig = () => {
@@ -119,6 +149,7 @@ const createConfig = () => {
     features: {
       mumble: process.env.MUMBLE_ENABLED === 'true',
       discord: process.env.DISCORD_ENABLED === 'true',
+      telegram: process.env.TELEGRAM_ENABLED === 'true',
     },
     mumble: {
       url: process.env.MUMBLE_URL,
@@ -126,6 +157,10 @@ const createConfig = () => {
     },
     discord: {
       token: process.env.DISCORD_BOT_TOKEN,
+    },
+    telegram: {
+      token: process.env.TELEGRAM_BOT_TOKEN,
+      chatId: process.env.TELEGRAM_CHAT_ID,
     },
   };
 
