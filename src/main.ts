@@ -39,10 +39,7 @@ const main = async () => {
     .use(bodyParser.json())
     .use(ConfigMiddleware)
     .use(InjectClientMiddleware(clients))
-    .use(
-      '/assets/sounds',
-      express.static(Config.filesystem.audioPath)
-    )
+    .use('/assets', express.static(Config.filesystem.audioPath))
     .get('/sounds', soundsHandler)
     .post('/play-sound', playSoundHandler)
     .post('/upload', uploadHandler)
