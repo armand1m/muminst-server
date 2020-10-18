@@ -23,7 +23,7 @@ export const playSoundHandler = async (
     if (!client) {
       throw createHttpError(
         HttpStatusCodes.BAD_REQUEST,
-        'The client property is required in the payload. Specify either "discord" or "mumble".'
+        'The client property is required in the payload. Specify either "discord", "mumble" or "telegram".'
       );
     }
 
