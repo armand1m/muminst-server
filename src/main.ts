@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import fileUpload from 'express-fileupload';
 import { Config, SupportedChatClient } from './config';
@@ -34,6 +35,11 @@ const main = async () => {
   };
 
   express()
+    .use(
+      morgan(
+        ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms'
+      )
+    )
     .use(cors())
     .use(fileUpload())
     .use(bodyParser.json())
