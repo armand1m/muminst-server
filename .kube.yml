@@ -35,10 +35,6 @@ spec:
       - name: muminst-server-volume
         persistentVolumeClaim:
           claimName: muminst-server-pv-claim
-      - name: muminst-server-disk
-        gcePersistentDisk:
-          pdName: muminst-server-disk
-          fsType: ext4
       containers:
       - image: {{.image}}
         imagePullPolicy: IfNotPresent
@@ -75,9 +71,9 @@ spec:
               name: discord-secrets
               key: bot_token
         - name: DB_PATH
-          value: /app/volume-data/db
+          value: /app/data/db
         - name: AUDIO_PATH
-          value: /app/volume-data/audio
+          value: /app/data/audio
         - name: NODE_ENV
           value: production
         resources:
@@ -86,8 +82,6 @@ spec:
             memory: 100Mi
         volumeMounts:
         - mountPath: /app/data
-          name: muminst-server-disk
-        - mountPath: /app/volume-data
           name: muminst-server-volume
 
 ---
