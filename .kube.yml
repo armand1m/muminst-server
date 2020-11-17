@@ -5,7 +5,7 @@ metadata:
   labels:
     app: muminst-server
 spec:
-  storageClassName: manual
+  storageClassName: standard 
   accessModes:
     - ReadWriteMany
   resources:
