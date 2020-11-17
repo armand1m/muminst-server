@@ -1,11 +1,11 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: muminst-server-pv-claim
+  name: muminst-server-pv-claim-csi
   labels:
     app: muminst-server
 spec:
-  storageClassName: standard 
+  storageClassName: standard-rwo 
   accessModes:
     - ReadWriteOnce
   resources:
@@ -34,7 +34,7 @@ spec:
       volumes:
       - name: muminst-server-volume
         persistentVolumeClaim:
-          claimName: muminst-server-pv-claim
+          claimName: muminst-server-pv-claim-csi
       containers:
       - image: {{.image}}
         imagePullPolicy: IfNotPresent
