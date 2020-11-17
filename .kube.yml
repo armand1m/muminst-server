@@ -7,7 +7,7 @@ metadata:
 spec:
   storageClassName: standard 
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 5Gi
@@ -32,6 +32,9 @@ spec:
         version: v1
     spec:
       volumes:
+      - name: muminst-server-volume
+        persistentVolumeClaim:
+          claimName: muminst-server-pv-claim
       - name: muminst-server-disk
         gcePersistentDisk:
           pdName: muminst-server-disk
@@ -84,6 +87,8 @@ spec:
         volumeMounts:
         - mountPath: /app/data
           name: muminst-server-disk
+        - mountPath: /app/volume-data
+          name: muminst-server-volume
 
 ---
 apiVersion: v1
