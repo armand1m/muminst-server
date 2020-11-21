@@ -62,7 +62,7 @@ spec:
         - name: MUMBLE_URL
           value: intruder.network
         - name: MUMBLE_USERNAME
-          value: InstantButtonBotKubernetes
+          value: IdiotaHipocrita
         - name: DISCORD_ENABLED
           value: "true"
         - name: DISCORD_BOT_TOKEN
