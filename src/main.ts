@@ -7,11 +7,11 @@ import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
 import { Config, SupportedChatClient } from './config';
 import { soundsHandler } from './handlers/sounds';
+import { uploadHandler } from './handlers/upload';
 import { playSoundHandler } from './handlers/playSound';
 import { ErrorMiddleware } from './middlewares/ErrorMiddleware';
-import { NotFoundMiddleware } from './middlewares/NotFoundMiddleware';
-import { uploadHandler } from './handlers/upload';
 import { ConfigMiddleware } from './middlewares/ConfigMiddleware';
+import { NotFoundMiddleware } from './middlewares/NotFoundMiddleware';
 import { InjectClientMiddleware } from './middlewares/InjectClientMiddleware';
 import { ChatClient } from './services/chatClient';
 import { getMumbleClient } from './services/mumble';
@@ -47,19 +47,17 @@ const main = async () => {
       // enable Express.js middleware tracing
       new Tracing.Integrations.Express({ app }),
     ],
-
-    // We recommend adjusting this value in production, or using tracesSampler
-    // for finer control
+    // We recommend adjusting this value in production,
+    // or using tracesSampler for finer control
     tracesSampleRate: 1.0,
   });
 
-  // RequestHandler creates a separate execution context using domains, so that every
-  // transaction/span/breadcrumb is attached to its own Hub instance
-  app.use(Sentry.Handlers.requestHandler());
-  // TracingHandler creates a trace for every incoming request
-  app.use(Sentry.Handlers.tracingHandler());
-
   app
+    // RequestHandler creates a separate execution context using domains, so that
+    // every transaction/span/breadcrumb is attached to its own Hub instance
+    .use(Sentry.Handlers.requestHandler())
+    // TracingHandler creates a trace for every incoming request
+    .use(Sentry.Handlers.tracingHandler())
     .use(
       morgan(
         ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms'
