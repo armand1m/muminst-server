@@ -3,6 +3,8 @@ import cors from 'cors';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import fileUpload from 'express-fileupload';
+import * as Sentry from '@sentry/node';
+import * as Tracing from '@sentry/tracing';
 import { Config, SupportedChatClient } from './config';
 import { soundsHandler } from './handlers/sounds';
 import { playSoundHandler } from './handlers/playSound';
@@ -34,7 +36,30 @@ const main = async () => {
       : undefined,
   };
 
-  express()
+  const app = express();
+
+  Sentry.init({
+    dsn:
+      'https://ad50cb3f5a5342d0bed25d51fb2040be@o480339.ingest.sentry.io/5527679',
+    integrations: [
+      // enable HTTP calls tracing
+      new Sentry.Integrations.Http({ tracing: true }),
+      // enable Express.js middleware tracing
+      new Tracing.Integrations.Express({ app }),
+    ],
+
+    // We recommend adjusting this value in production, or using tracesSampler
+    // for finer control
+    tracesSampleRate: 1.0,
+  });
+
+  // RequestHandler creates a separate execution context using domains, so that every
+  // transaction/span/breadcrumb is attached to its own Hub instance
+  app.use(Sentry.Handlers.requestHandler());
+  // TracingHandler creates a trace for every incoming request
+  app.use(Sentry.Handlers.tracingHandler());
+
+  app
     .use(
       morgan(
         ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms'
@@ -49,6 +74,17 @@ const main = async () => {
     .get('/sounds', soundsHandler)
     .post('/play-sound', playSoundHandler)
     .post('/upload', uploadHandler)
+    .use(
+      Sentry.Handlers.errorHandler({
+        shouldHandleError(error) {
+          if (!error?.status) {
+            return false;
+          }
+
+          return error.status > 400;
+        },
+      })
+    )
     .use(NotFoundMiddleware)
     .use(ErrorMiddleware)
     .listen(port, () => {

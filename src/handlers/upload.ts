@@ -8,7 +8,11 @@ import { db } from '../db';
 import { makeSound } from '../model/Sound';
 import { buildFilePath } from '../util/buildFilePath';
 
-const validExtensions: FileTypeResult['ext'][] = ['mp3', 'wav', 'webm'];
+const validExtensions: FileTypeResult['ext'][] = [
+  'mp3',
+  'wav',
+  'webm',
+];
 
 const isValidFile = async (file: UploadedFile) => {
   const fileType = await fromBuffer(file.data);
