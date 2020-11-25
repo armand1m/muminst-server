@@ -3,18 +3,13 @@ import NoodleJS from 'noodle.js';
 import { MumbleProperties } from '../config';
 import { ChatClient } from './chatClient';
 
-let _isLocked = false;
 let _currentClient: ChatClient | undefined;
 
-export const isLocked = () => {
-  return _isLocked;
-};
-
-const setLocked = (value: boolean) => {
-  _isLocked = value;
-};
-
-const setupClient = ({ url, username }: MumbleProperties) => {
+const setupClient = ({
+  url,
+  username,
+  lockStore,
+}: MumbleProperties) => {
   return new Promise<ChatClient>((resolve) => {
     console.log('Configuring Mumble Client..');
 
@@ -27,18 +22,18 @@ const setupClient = ({ url, username }: MumbleProperties) => {
       console.log('Mumble Client is ready.');
 
       const playFile = (filename: string) => {
-        setLocked(true);
+        lockStore.getState().setLocked(true);
         client.voiceConnection.playFile(filename);
       };
 
       resolve({
-        isLocked,
+        isLocked: () => lockStore.getState().isLocked,
         playFile,
       });
     });
 
     client.voiceConnection.on('end', (_event: any) => {
-      setLocked(false);
+      lockStore.getState().setLocked(false);
     });
 
     client.connect();

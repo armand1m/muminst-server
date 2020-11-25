@@ -1,5 +1,6 @@
 require('dotenv').config();
 import * as yup from 'yup';
+import { LockStore } from './stores/LockStore';
 
 const createRequiredErrMessage = (
   envVar: string,
@@ -21,15 +22,18 @@ export type SupportedChatClient = 'mumble' | 'discord' | 'telegram';
 export interface MumbleProperties {
   url: string;
   username: string;
+  lockStore: LockStore;
 }
 
 export interface DiscordProperties {
   token: string;
+  lockStore: LockStore;
 }
 
 export interface TelegramProperties {
   token: string;
   chatId: string;
+  lockStore: LockStore;
 }
 
 const schema = yup.object({

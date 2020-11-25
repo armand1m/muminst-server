@@ -3,8 +3,10 @@ import cors from 'cors';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import fileUpload from 'express-fileupload';
+import expressWebSocket from 'express-ws';
 import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
+
 import { Config, SupportedChatClient } from './config';
 import { soundsHandler } from './handlers/sounds';
 import { uploadHandler } from './handlers/upload';
@@ -17,26 +19,45 @@ import { ChatClient } from './services/chatClient';
 import { getMumbleClient } from './services/mumble';
 import { getDiscordClient } from './services/discord';
 import { getTelegramClient } from './services/telegram';
+import { createLockStore } from './stores/LockStore';
 
 const { proto, hostname, port } = Config.metadata;
 
 const main = async () => {
+  const { app } = expressWebSocket(express());
+
+  const lockStore = createLockStore();
+  const wsRouter = express.Router();
+
+  wsRouter.ws('/ws', function (ws, req) {
+    lockStore.subscribe((state) => {
+      ws.send(
+        JSON.stringify({
+          isLocked: state.isLocked,
+        })
+      );
+    });
+  });
+
+  const withLockStore = <T>(config: T) => ({
+    ...config,
+    lockStore,
+  });
+
   const clients: Record<
     SupportedChatClient,
     ChatClient | undefined
   > = {
     mumble: Config.features.mumble
-      ? await getMumbleClient(Config.mumble)
+      ? await getMumbleClient(withLockStore(Config.mumble))
       : undefined,
     discord: Config.features.discord
-      ? await getDiscordClient(Config.discord)
+      ? await getDiscordClient(withLockStore(Config.discord))
       : undefined,
     telegram: Config.features.telegram
-      ? await getTelegramClient(Config.telegram)
+      ? await getTelegramClient(withLockStore(Config.telegram))
       : undefined,
   };
-
-  const app = express();
 
   Sentry.init({
     dsn:
@@ -72,6 +93,7 @@ const main = async () => {
     .get('/sounds', soundsHandler)
     .post('/play-sound', playSoundHandler)
     .post('/upload', uploadHandler)
+    .use(wsRouter)
     .use(
       Sentry.Handlers.errorHandler({
         shouldHandleError(error) {
@@ -87,7 +109,8 @@ const main = async () => {
     .use(ErrorMiddleware)
     .listen(port, () => {
       console.log(
-        `Muminst server listening at ${proto}://${hostname}:${port}`
+        `Muminst server listening at ${proto}://${hostname}:${port}\n` +
+          `Muminst websocket listening at ws://${hostname}:${port}`
       );
     });
 };

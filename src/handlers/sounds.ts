@@ -7,7 +7,9 @@ export const soundsHandler = async (
   next: NextFunction
 ) => {
   try {
-    res.json(db.sounds.list());
+    res.json(
+      db.sounds.list().sort((a, b) => a.name.localeCompare(b.name))
+    );
   } catch (err) {
     next(err);
   }

@@ -1,37 +1,29 @@
 import Discord from 'discord.js';
 import { DiscordProperties } from '../config';
+import { LockStore } from '../stores/LockStore';
 import { ChatClient } from './chatClient';
 
-let _isLocked = false;
 let _currentClient: ChatClient | undefined;
 let _currentConnection: Discord.VoiceConnection | undefined;
 
-export const isLocked = () => {
-  return _isLocked;
-};
+const setupClient = (token: string, lockStore: LockStore) => {
+  const playFile = (filename: string) => {
+    lockStore.getState().setLocked(true);
 
-const setLocked = (value: boolean) => {
-  _isLocked = value;
-};
+    if (!_currentConnection) {
+      throw new Error(
+        'You need to invite the bot to a channel first. Join a channel and invite the bot with `/muminst-join` then try again.'
+      );
+    }
 
-const playFile = (filename: string) => {
-  setLocked(true);
+    const dispatcher = _currentConnection.play(filename);
 
-  if (!_currentConnection) {
-    throw new Error(
-      'You need to invite the bot to a channel first. Join a channel and invite the bot with `/muminst-join` then try again.'
-    );
-  }
+    dispatcher.on('finish', () => {
+      lockStore.getState().setLocked(false);
+      dispatcher.destroy();
+    });
+  };
 
-  const dispatcher = _currentConnection.play(filename);
-
-  dispatcher.on('finish', () => {
-    setLocked(false);
-    dispatcher.destroy();
-  });
-};
-
-const setupClient = (token: string) => {
   return new Promise<ChatClient>((resolve) => {
     console.log('Configuring Discord client..');
 
@@ -70,7 +62,7 @@ const setupClient = (token: string) => {
     client.login(token);
 
     resolve({
-      isLocked,
+      isLocked: () => lockStore.getState().isLocked,
       playFile,
     });
   });
@@ -78,9 +70,10 @@ const setupClient = (token: string) => {
 
 export const getDiscordClient = async ({
   token,
+  lockStore,
 }: DiscordProperties) => {
   if (!_currentClient) {
-    _currentClient = await setupClient(token);
+    _currentClient = await setupClient(token, lockStore);
   }
 
   return _currentClient;
