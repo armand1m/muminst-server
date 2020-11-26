@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import { Logger } from 'pino';
 import { DiscordProperties } from '../config';
 import { LockStore } from '../stores/LockStore';
 import { ChatClient } from './chatClient';
@@ -6,16 +7,19 @@ import { ChatClient } from './chatClient';
 let _currentClient: ChatClient | undefined;
 let _currentConnection: Discord.VoiceConnection | undefined;
 
-const setupClient = (token: string, lockStore: LockStore) => {
+const setupClient = (
+  logger: Logger,
+  lockStore: LockStore,
+  { token }: DiscordProperties
+) => {
   const playFile = (filename: string) => {
-    lockStore.getState().setLocked(true);
-
     if (!_currentConnection) {
       throw new Error(
         'You need to invite the bot to a channel first. Join a channel and invite the bot with `/muminst-join` then try again.'
       );
     }
 
+    lockStore.getState().setLocked(true);
     const dispatcher = _currentConnection.play(filename);
 
     dispatcher.on('finish', () => {
@@ -25,14 +29,14 @@ const setupClient = (token: string, lockStore: LockStore) => {
   };
 
   return new Promise<ChatClient>((resolve) => {
-    console.log('Configuring Discord client..');
+    logger.info('Configuring Discord client..');
 
     const client = new Discord.Client();
 
     client.on('ready', () => {
-      console.log('Discord client is ready.');
+      logger.info('Discord client is ready.');
       if (client.user) {
-        console.log(`Logged in as ${client.user.tag}!`);
+        logger.info(`Logged in as ${client.user.tag}`);
       }
     });
 
@@ -53,7 +57,7 @@ const setupClient = (token: string, lockStore: LockStore) => {
 
         _currentConnection = await channel.join();
 
-        console.log(
+        logger.info(
           `Discord Client joined channel "${channel.name}"`
         );
       }
@@ -68,12 +72,13 @@ const setupClient = (token: string, lockStore: LockStore) => {
   });
 };
 
-export const getDiscordClient = async ({
-  token,
-  lockStore,
-}: DiscordProperties) => {
+export const getDiscordClient = async (
+  logger: Logger,
+  lockStore: LockStore,
+  props: DiscordProperties
+) => {
   if (!_currentClient) {
-    _currentClient = await setupClient(token, lockStore);
+    _currentClient = await setupClient(logger, lockStore, props);
   }
 
   return _currentClient;

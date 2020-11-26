@@ -1,6 +1,5 @@
 require('dotenv').config();
 import * as yup from 'yup';
-import { LockStore } from './stores/LockStore';
 
 const createRequiredErrMessage = (
   envVar: string,
@@ -22,23 +21,29 @@ export type SupportedChatClient = 'mumble' | 'discord' | 'telegram';
 export interface MumbleProperties {
   url: string;
   username: string;
-  lockStore: LockStore;
 }
 
 export interface DiscordProperties {
   token: string;
-  lockStore: LockStore;
 }
 
 export interface TelegramProperties {
   token: string;
   chatId: string;
-  lockStore: LockStore;
 }
 
 const schema = yup.object({
   metadata: yup
     .object({
+      environment: yup
+        .string()
+        .oneOf(['development', 'production'])
+        .required(
+          createRequiredErrMessage('NODE_ENV', [
+            'development',
+            'production',
+          ])
+        ),
       hostname: yup
         .string()
         .required(createRequiredErrMessage('HOSTNAME')),
@@ -142,6 +147,7 @@ const schema = yup.object({
 const createConfig = () => {
   const unsafeConfig = {
     metadata: {
+      environment: process.env.NODE_ENV,
       hostname: process.env.HOSTNAME ?? '0.0.0.0',
       port: Number(process.env.PORT) ?? 4000,
       proto: process.env.PROTO,

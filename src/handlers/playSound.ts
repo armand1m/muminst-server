@@ -61,7 +61,7 @@ export const playSoundHandler = async (
 
     chatClient.playFile(buildFilePath(sound));
 
-    res.json({ success: true });
+    res.status(204).send();
   } catch (err) {
     next(err);
   }

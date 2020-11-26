@@ -19,9 +19,10 @@
     "http-status-codes": "^2.1.4",
     "lowdb": "^1.0.0",
     "mkdirp": "^1.0.4",
-    "morgan": "^1.10.0",
     "node-fetch": "^2.6.1",
     "noodle.js": "guilhermelimak/NoodleJS",
+    "pino": "^6.7.0",
+    "pino-http": "^5.3.0",
     "ramda": "^0.27.1",
     "telegraf": "^3.38.0",
     "tslib": "^2.0.1",
@@ -46,8 +47,11 @@
     "@types/mkdirp": "^1.0.1",
     "@types/morgan": "^1.9.1",
     "@types/node-fetch": "^2.5.7",
+    "@types/pino": "^6.3.4",
+    "@types/pino-http": "^5.0.5",
     "@types/yup": "^0.29.7",
     "jest": "^26.5.2",
+    "pino-pretty": "^4.3.0",
     "prettier": "^2.1.2",
     "ts-node": "^9.0.0"
   }

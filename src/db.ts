@@ -5,16 +5,19 @@ import mkdirp from 'mkdirp';
 import FileSync from 'lowdb/adapters/FileSync';
 import { Sound } from './model/Sound';
 import { Config } from './config';
+import { logger } from './logger';
 
 const { dbPath, audioPath } = Config.filesystem;
 
-console.log(`Creating "${dbPath}" with "mkdir -p"`);
-mkdirp.sync(dbPath);
-console.log(`Created ${dbPath}`);
+const dbLogger = logger.child({ source: 'database' });
 
-console.log(`Creating "${audioPath}" with "mkdir -p"`);
+dbLogger.info(`Creating "${dbPath}" with "mkdir -p"`);
+mkdirp.sync(dbPath);
+dbLogger.info(`Created ${dbPath}`);
+
+dbLogger.info(`Creating "${audioPath}" with "mkdir -p"`);
 mkdirp.sync(audioPath);
-console.log(`Created ${audioPath}`);
+dbLogger.info(`Created ${audioPath}`);
 
 const databaseFilePath = path.resolve(dbPath, 'database.json');
 
