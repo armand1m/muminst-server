@@ -24,18 +24,26 @@ import { createLockStore } from './stores/LockStore';
 const { proto, hostname, port } = Config.metadata;
 
 const main = async () => {
-  const { app } = expressWebSocket(express());
+  const { app, getWss } = expressWebSocket(express());
 
   const lockStore = createLockStore();
   const wsRouter = express.Router();
 
+  const wss = getWss();
+
   wsRouter.ws('/ws', function (ws, req) {
     lockStore.subscribe((state) => {
-      ws.send(
-        JSON.stringify({
-          isLocked: state.isLocked,
-        })
-      );
+      wss.clients.forEach(function each(client) {
+        if (client.readyState !== ws.OPEN) {
+          return;
+        }
+
+        client.send(
+          JSON.stringify({
+            isLocked: state.isLocked,
+          })
+        );
+      });
     });
   });
 
