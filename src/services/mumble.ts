@@ -1,22 +1,19 @@
 // @ts-ignore
 import NoodleJS from 'noodle.js';
+import { Logger } from 'pino';
 import { MumbleProperties } from '../config';
+import { LockStore } from '../stores/LockStore';
 import { ChatClient } from './chatClient';
 
-let _isLocked = false;
 let _currentClient: ChatClient | undefined;
 
-export const isLocked = () => {
-  return _isLocked;
-};
-
-const setLocked = (value: boolean) => {
-  _isLocked = value;
-};
-
-const setupClient = ({ url, username }: MumbleProperties) => {
+const setupClient = (
+  logger: Logger,
+  lockStore: LockStore,
+  { url, username }: MumbleProperties
+) => {
   return new Promise<ChatClient>((resolve) => {
-    console.log('Configuring Mumble Client..');
+    logger.info('Configuring Mumble Client..');
 
     const client = new NoodleJS({
       url,
@@ -24,30 +21,34 @@ const setupClient = ({ url, username }: MumbleProperties) => {
     });
 
     client.on('ready', () => {
-      console.log('Mumble Client is ready.');
+      logger.info('Mumble Client is ready.');
 
       const playFile = (filename: string) => {
-        setLocked(true);
+        lockStore.getState().setLocked(true);
         client.voiceConnection.playFile(filename);
       };
 
       resolve({
-        isLocked,
+        isLocked: () => lockStore.getState().isLocked,
         playFile,
       });
     });
 
     client.voiceConnection.on('end', (_event: any) => {
-      setLocked(false);
+      lockStore.getState().setLocked(false);
     });
 
     client.connect();
   });
 };
 
-export const getMumbleClient = async (props: MumbleProperties) => {
+export const getMumbleClient = async (
+  logger: Logger,
+  lockStore: LockStore,
+  props: MumbleProperties
+) => {
   if (!_currentClient) {
-    _currentClient = await setupClient(props);
+    _currentClient = await setupClient(logger, lockStore, props);
   }
 
   return _currentClient;

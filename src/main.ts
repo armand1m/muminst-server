@@ -1,10 +1,13 @@
 import express from 'express';
 import cors from 'cors';
-import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import fileUpload from 'express-fileupload';
+import expressWebSocket from 'express-ws';
 import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
+import pinoHttp from 'pino-http';
+
+import { logger } from './logger';
 import { Config, SupportedChatClient } from './config';
 import { soundsHandler } from './handlers/sounds';
 import { uploadHandler } from './handlers/upload';
@@ -17,26 +20,76 @@ import { ChatClient } from './services/chatClient';
 import { getMumbleClient } from './services/mumble';
 import { getDiscordClient } from './services/discord';
 import { getTelegramClient } from './services/telegram';
+import { createLockStore } from './stores/LockStore';
 
 const { proto, hostname, port } = Config.metadata;
 
+const httpServerLogger = logger.child({ source: 'http-server' });
+const wsLogger = logger.child({ source: 'ws-server' });
+
 const main = async () => {
+  const { app } = expressWebSocket(express());
+
+  const lockStore = createLockStore();
+  const wsRouter = express.Router();
+
+  wsRouter.ws('/ws', function (ws, _req) {
+    wsLogger.info('Client subscribing to lockStore changes.');
+
+    const unsubscribe = lockStore.subscribe((state) => {
+      if (ws.readyState === ws.OPEN) {
+        ws.send(
+          JSON.stringify({
+            isLocked: state.isLocked,
+          }),
+          (err) => {
+            if (err) {
+              wsLogger.error(
+                'Error while sending message to the client.'
+              );
+              wsLogger.error(err);
+            }
+
+            wsLogger.info('Message sent to the client.');
+          }
+        );
+      }
+
+      if (ws.readyState === ws.CLOSED) {
+        wsLogger.info(
+          'Client connection got closed. Terminating connection.'
+        );
+        ws.terminate();
+        unsubscribe();
+      }
+    });
+  });
+
   const clients: Record<
     SupportedChatClient,
     ChatClient | undefined
   > = {
     mumble: Config.features.mumble
-      ? await getMumbleClient(Config.mumble)
+      ? await getMumbleClient(
+          logger.child({ source: 'mumble-client' }),
+          lockStore,
+          Config.mumble
+        )
       : undefined,
     discord: Config.features.discord
-      ? await getDiscordClient(Config.discord)
+      ? await getDiscordClient(
+          logger.child({ source: 'discord-client' }),
+          lockStore,
+          Config.discord
+        )
       : undefined,
     telegram: Config.features.telegram
-      ? await getTelegramClient(Config.telegram)
+      ? await getTelegramClient(
+          logger.child({ source: 'telegram-client' }),
+          Config.telegram
+        )
       : undefined,
   };
-
-  const app = express();
 
   Sentry.init({
     dsn:
@@ -58,11 +111,7 @@ const main = async () => {
     .use(Sentry.Handlers.requestHandler())
     // TracingHandler creates a trace for every incoming request
     .use(Sentry.Handlers.tracingHandler())
-    .use(
-      morgan(
-        ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms'
-      )
-    )
+    .use(pinoHttp({ logger: httpServerLogger }))
     .use(cors())
     .use(fileUpload())
     .use(bodyParser.json())
@@ -72,6 +121,7 @@ const main = async () => {
     .get('/sounds', soundsHandler)
     .post('/play-sound', playSoundHandler)
     .post('/upload', uploadHandler)
+    .use(wsRouter)
     .use(
       Sentry.Handlers.errorHandler({
         shouldHandleError(error) {
@@ -86,8 +136,11 @@ const main = async () => {
     .use(NotFoundMiddleware)
     .use(ErrorMiddleware)
     .listen(port, () => {
-      console.log(
-        `Muminst server listening at ${proto}://${hostname}:${port}`
+      httpServerLogger.info(
+        `HTTP Server listening at ${proto}://${hostname}:${port}`
+      );
+      wsLogger.info(
+        `WS Server listening at ws://${hostname}:${port}`
       );
     });
 };

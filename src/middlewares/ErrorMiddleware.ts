@@ -3,11 +3,13 @@ import { Request, Response, NextFunction } from 'express';
 
 export function ErrorMiddleware(
   err: HttpException,
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction
 ) {
   if (err) {
+    req.log.error(err);
+
     if (!res.writableEnded) {
       const status = err.status || 500;
       const title = err.message || err.toString();

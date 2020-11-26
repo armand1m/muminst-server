@@ -1,46 +1,42 @@
 import Discord from 'discord.js';
+import { Logger } from 'pino';
 import { DiscordProperties } from '../config';
+import { LockStore } from '../stores/LockStore';
 import { ChatClient } from './chatClient';
 
-let _isLocked = false;
 let _currentClient: ChatClient | undefined;
 let _currentConnection: Discord.VoiceConnection | undefined;
 
-export const isLocked = () => {
-  return _isLocked;
-};
+const setupClient = (
+  logger: Logger,
+  lockStore: LockStore,
+  { token }: DiscordProperties
+) => {
+  const playFile = (filename: string) => {
+    if (!_currentConnection) {
+      throw new Error(
+        'You need to invite the bot to a channel first. Join a channel and invite the bot with `/muminst-join` then try again.'
+      );
+    }
 
-const setLocked = (value: boolean) => {
-  _isLocked = value;
-};
+    lockStore.getState().setLocked(true);
+    const dispatcher = _currentConnection.play(filename);
 
-const playFile = (filename: string) => {
-  setLocked(true);
+    dispatcher.on('finish', () => {
+      lockStore.getState().setLocked(false);
+      dispatcher.destroy();
+    });
+  };
 
-  if (!_currentConnection) {
-    throw new Error(
-      'You need to invite the bot to a channel first. Join a channel and invite the bot with `/muminst-join` then try again.'
-    );
-  }
-
-  const dispatcher = _currentConnection.play(filename);
-
-  dispatcher.on('finish', () => {
-    setLocked(false);
-    dispatcher.destroy();
-  });
-};
-
-const setupClient = (token: string) => {
   return new Promise<ChatClient>((resolve) => {
-    console.log('Configuring Discord client..');
+    logger.info('Configuring Discord client..');
 
     const client = new Discord.Client();
 
     client.on('ready', () => {
-      console.log('Discord client is ready.');
+      logger.info('Discord client is ready.');
       if (client.user) {
-        console.log(`Logged in as ${client.user.tag}!`);
+        logger.info(`Logged in as ${client.user.tag}`);
       }
     });
 
@@ -61,7 +57,7 @@ const setupClient = (token: string) => {
 
         _currentConnection = await channel.join();
 
-        console.log(
+        logger.info(
           `Discord Client joined channel "${channel.name}"`
         );
       }
@@ -70,17 +66,19 @@ const setupClient = (token: string) => {
     client.login(token);
 
     resolve({
-      isLocked,
+      isLocked: () => lockStore.getState().isLocked,
       playFile,
     });
   });
 };
 
-export const getDiscordClient = async ({
-  token,
-}: DiscordProperties) => {
+export const getDiscordClient = async (
+  logger: Logger,
+  lockStore: LockStore,
+  props: DiscordProperties
+) => {
   if (!_currentClient) {
-    _currentClient = await setupClient(token);
+    _currentClient = await setupClient(logger, lockStore, props);
   }
 
   return _currentClient;

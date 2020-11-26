@@ -35,6 +35,15 @@ export interface TelegramProperties {
 const schema = yup.object({
   metadata: yup
     .object({
+      environment: yup
+        .string()
+        .oneOf(['development', 'production'])
+        .required(
+          createRequiredErrMessage('NODE_ENV', [
+            'development',
+            'production',
+          ])
+        ),
       hostname: yup
         .string()
         .required(createRequiredErrMessage('HOSTNAME')),
@@ -138,6 +147,7 @@ const schema = yup.object({
 const createConfig = () => {
   const unsafeConfig = {
     metadata: {
+      environment: process.env.NODE_ENV,
       hostname: process.env.HOSTNAME ?? '0.0.0.0',
       port: Number(process.env.PORT) ?? 4000,
       proto: process.env.PROTO,
