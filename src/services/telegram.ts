@@ -3,6 +3,7 @@ import { Telegram } from 'telegraf';
 import { ChatClient } from './chatClient';
 import { TelegramProperties } from '../config';
 import { Logger } from 'pino';
+import { buildFilePath } from '../util/buildFilePath';
 
 let _currentClient: ChatClient | undefined;
 
@@ -19,6 +20,13 @@ const setupClient = async (
     playFile: (filename) => {
       telegramClient.sendAudio(chatId, {
         source: fs.createReadStream(filename),
+      });
+    },
+    playSound: (sound) => {
+      const filepath = buildFilePath(sound);
+      telegramClient.sendAudio(chatId, {
+        source: fs.createReadStream(filepath),
+        filename: sound.name,
       });
     },
   };

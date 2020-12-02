@@ -1,7 +1,9 @@
 import { NodeGrumble } from 'node-grumble';
 import { Logger } from 'pino';
 import { MumbleProperties } from '../config';
+import { Sound } from '../model/Sound';
 import { LockStore } from '../stores/LockStore';
+import { buildFilePath } from '../util/buildFilePath';
 import { ChatClient } from './chatClient';
 
 let _currentClient: ChatClient | undefined;
@@ -27,11 +29,22 @@ const setupClient = async (
     lockState.setLocked(false);
   };
 
+  const playSound = async (sound: Sound) => {
+    const filepath = buildFilePath(sound);
+    connection.sendTextMessage(`playing "${sound.name}"`);
+
+    const lockState = lockStore.getState();
+    lockState.setLocked(true);
+    await connection.playFile(filepath);
+    lockState.setLocked(false);
+  };
+
   const isLocked = () => lockStore.getState().isLocked;
 
   return {
     isLocked,
     playFile,
+    playSound,
   };
 };
 

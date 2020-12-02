@@ -2,6 +2,7 @@ import Discord from 'discord.js';
 import { Logger } from 'pino';
 import { DiscordProperties } from '../config';
 import { LockStore } from '../stores/LockStore';
+import { buildFilePath } from '../util/buildFilePath';
 import { ChatClient } from './chatClient';
 
 let _currentClient: ChatClient | undefined;
@@ -68,6 +69,11 @@ const setupClient = (
     resolve({
       isLocked: () => lockStore.getState().isLocked,
       playFile,
+      playSound: (sound) => {
+        const filepath = buildFilePath(sound);
+        /** TODO: Send message to discord channel as well */
+        playFile(filepath);
+      },
     });
   });
 };

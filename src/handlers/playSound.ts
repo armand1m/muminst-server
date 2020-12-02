@@ -3,7 +3,6 @@ import createHttpError from 'http-errors';
 import HttpStatusCodes from 'http-status-codes';
 import { SupportedChatClient } from '../config';
 import { db } from '../db';
-import { buildFilePath } from '../util/buildFilePath';
 
 type WithBody<B extends object> = Request<{}, {}, B>;
 
@@ -59,7 +58,7 @@ export const playSoundHandler = async (
       );
     }
 
-    chatClient.playFile(buildFilePath(sound));
+    chatClient.playSound(sound);
 
     res.status(204).send();
   } catch (err) {
