@@ -20,7 +20,7 @@
     "lowdb": "^1.0.0",
     "mkdirp": "^1.0.4",
     "node-fetch": "^2.6.1",
-    "node-grumble": "^1.0.0",
+    "node-grumble": "^1.0.1",
     "pino": "^6.7.0",
     "pino-http": "^5.3.0",
     "ramda": "^0.27.1",
