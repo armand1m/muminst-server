@@ -8,7 +8,7 @@ import * as Tracing from '@sentry/tracing';
 import pinoHttp from 'pino-http';
 
 import { logger } from './logger';
-import { Config, SupportedChatClient } from './config';
+import { Config } from './config';
 import { soundsHandler } from './handlers/sounds';
 import { uploadHandler } from './handlers/upload';
 import { playSoundHandler } from './handlers/playSound';
@@ -16,7 +16,6 @@ import { ErrorMiddleware } from './middlewares/ErrorMiddleware';
 import { ConfigMiddleware } from './middlewares/ConfigMiddleware';
 import { NotFoundMiddleware } from './middlewares/NotFoundMiddleware';
 import { InjectClientMiddleware } from './middlewares/InjectClientMiddleware';
-import { ChatClient } from './services/chatClient';
 import { getMumbleClient } from './services/mumble';
 import { getDiscordClient } from './services/discord';
 import { getTelegramClient } from './services/telegram';
@@ -28,47 +27,8 @@ const httpServerLogger = logger.child({ source: 'http-server' });
 const wsLogger = logger.child({ source: 'ws-server' });
 
 const main = async () => {
-  const { app } = expressWebSocket(express());
-
   const lockStore = createLockStore();
-  const wsRouter = express.Router();
-
-  wsRouter.ws('/ws', function (ws, _req) {
-    wsLogger.info('Client subscribing to lockStore changes.');
-
-    const unsubscribe = lockStore.subscribe((state) => {
-      if (ws.readyState === ws.OPEN) {
-        ws.send(
-          JSON.stringify({
-            isLocked: state.isLocked,
-          }),
-          (err) => {
-            if (err) {
-              wsLogger.error(
-                'Error while sending message to the client.'
-              );
-              wsLogger.error(err);
-            }
-
-            wsLogger.info('Message sent to the client.');
-          }
-        );
-      }
-
-      if (ws.readyState === ws.CLOSED) {
-        wsLogger.info(
-          'Client connection got closed. Terminating connection.'
-        );
-        ws.terminate();
-        unsubscribe();
-      }
-    });
-  });
-
-  const clients: Record<
-    SupportedChatClient,
-    ChatClient | undefined
-  > = {
+  const clients = {
     mumble: Config.features.mumble
       ? await getMumbleClient(
           logger.child({ source: 'mumble-client' }),
@@ -90,6 +50,47 @@ const main = async () => {
         )
       : undefined,
   };
+
+  const { app } = expressWebSocket(express());
+
+  const wsRouter = express.Router();
+
+  wsRouter.ws('/ws', function (ws, _req) {
+    wsLogger.info('Client subscribing to lockStore changes.');
+
+    const unsubscribeLockStore = lockStore.subscribe((state) => {
+      if (ws.readyState === ws.OPEN) {
+        const payload = JSON.stringify({
+          isLocked: state.isLocked,
+        });
+
+        ws.send(payload, (err) => {
+          if (err) {
+            wsLogger.error(
+              'Error while sending message to the client.'
+            );
+            wsLogger.error(err);
+          }
+
+          wsLogger.info('Message sent to the client.');
+        });
+      }
+    });
+
+    /** Connection recycling. */
+    const recyclingInterval = setInterval(() => {
+      wsLogger.info('Running recycling interval for connection..');
+
+      if (ws.readyState === ws.CLOSED) {
+        wsLogger.info(
+          'Client connection got closed. Terminating connection and listeners.'
+        );
+        ws.terminate();
+        unsubscribeLockStore();
+        clearInterval(recyclingInterval);
+      }
+    }, 15000);
+  });
 
   Sentry.init({
     dsn:
