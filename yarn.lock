@@ -3476,10 +3476,10 @@ node-fetch@^2.2.0, node-fetch@^2.6.0, node-fetch@^2.6.1:
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
 
-node-grumble@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/node-grumble/-/node-grumble-1.0.2.tgz#8e94f4df2922c5125ae92d25d08f27cf80499807"
-  integrity sha512-YLcZa3aYxRnopNy0fUQWZllKO5M+EHdCuxzjYHb6l6B2iLkOvwnjuQL+P+q3acJVHTJ3Z2KjjTshAQfm52Mc0g==
+node-grumble@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/node-grumble/-/node-grumble-1.0.3.tgz#ef10a2e74c829574c0a301bfd4ae3dbdd562283a"
+  integrity sha512-Oulqxjp1+jKmj8onHicrVAcYPIEUXw0qJwFP/j8hY8yZwTdZQy71xHeFBChg8Q6l8YBnwXaH2ZV7+WKBgXYLLA==
   dependencies:
     "@discordjs/opus" "^0.3.3"
     fluent-ffmpeg "^2.1.2"
