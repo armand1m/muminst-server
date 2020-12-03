@@ -92,6 +92,14 @@ const schema = yup.object({
             'false',
           ])
         ),
+      textMessageOnPlay: yup
+        .boolean()
+        .required(
+          createRequiredErrMessage(
+            'FEATURE_TEXT_MESSAGE_ON_PLAY_ENABLED',
+            ['true', 'false']
+          )
+        ),
     })
     .required(),
   mumble: yup
@@ -160,6 +168,8 @@ const createConfig = () => {
       mumble: process.env.MUMBLE_ENABLED === 'true',
       discord: process.env.DISCORD_ENABLED === 'true',
       telegram: process.env.TELEGRAM_ENABLED === 'true',
+      textMessageOnPlay:
+        process.env.FEATURE_TEXT_MESSAGE_ON_PLAY_ENABLED === 'true',
     },
     mumble: {
       url: process.env.MUMBLE_URL,
