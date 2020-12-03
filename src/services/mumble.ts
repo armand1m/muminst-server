@@ -15,10 +15,12 @@ const setupClient = async (
 ) => {
   logger.info('Configuring Mumble Client..');
 
-  const connection = await NodeGrumble.connect({
+  const grumble = NodeGrumble.create({
     url,
     name: username,
   });
+
+  const connection = await grumble.connect();
 
   logger.info('Mumble Client Connected.');
 
