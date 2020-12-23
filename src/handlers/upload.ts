@@ -11,6 +11,7 @@ import { buildFilePath } from '../util/buildFilePath';
 const validExtensions: FileTypeResult['ext'][] = [
   'mp3',
   'wav',
+  'ogg',
   'webm',
 ];
 
