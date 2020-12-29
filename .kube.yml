@@ -79,8 +79,11 @@ spec:
         - name: NODE_ENV
           value: production
         resources:
+          limits:
+            cpu: 600m
+            memory: 256Mi
           requests:
-            cpu: 15m
+            cpu: 250m
             memory: 100Mi
         volumeMounts:
         - mountPath: /app/data
