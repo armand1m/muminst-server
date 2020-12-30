@@ -64,7 +64,7 @@ spec:
         - name: MUMBLE_URL
           value: intruder.network
         - name: MUMBLE_USERNAME
-          value: IdiotaHipocrita
+          value: veio_hipocrita 
         - name: DISCORD_ENABLED
           value: "true"
         - name: DISCORD_BOT_TOKEN
@@ -80,10 +80,10 @@ spec:
           value: production
         resources:
           limits:
-            cpu: 600m
+            cpu: 250m 
             memory: 256Mi
           requests:
-            cpu: 250m
+            cpu: 100m 
             memory: 100Mi
         volumeMounts:
         - mountPath: /app/data
