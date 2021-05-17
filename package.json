@@ -6,6 +6,7 @@
     "@types/express-fileupload": "^1.1.5",
     "@types/lowdb": "^1.0.9",
     "@types/ramda": "^0.27.20",
+    "async-await-retry": "^1.2.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "discord.js": "^12.3.1",

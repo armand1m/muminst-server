@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import { Logger } from 'pino';
+import retry from 'async-await-retry';
 import { DiscordProperties } from '../config';
 import { LockStore } from '../stores/LockStore';
 import { buildFilePath } from '../util/buildFilePath';
@@ -84,7 +85,9 @@ export const getDiscordClient = async (
   props: DiscordProperties
 ) => {
   if (!_currentClient) {
-    _currentClient = await setupClient(logger, lockStore, props);
+    _currentClient = await retry(() =>
+      setupClient(logger, lockStore, props)
+    );
   }
 
   return _currentClient;

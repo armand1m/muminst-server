@@ -1119,6 +1119,11 @@ assign-symbols@^1.0.0:
   resolved "https://registry.yarnpkg.com/assign-symbols/-/assign-symbols-1.0.0.tgz#59667f41fadd4f20ccbc2bb96b8d4f7f78ec0367"
   integrity sha1-WWZ/QfrdTyDMvCu5a41Pf3jsA2c=
 
+async-await-retry@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/async-await-retry/-/async-await-retry-1.2.1.tgz#3c0b458d3303d97c070b7826e6529c8cc0fbe5bf"
+  integrity sha512-fPyKJOlnBeUoo0Ak2gEoVODFo8dh3Vf6OTMlEIIc0YCglWx/k4jJum69L4jZsQaQMECzrl2LpsAe2mKdXqrZfw==
+
 async-limiter@~1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/async-limiter/-/async-limiter-1.0.1.tgz#dd379e94f0db8310b08291f9d64c3209766617fd"
