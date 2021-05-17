@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import { Logger } from 'pino';
+// @ts-ignore
 import retry from 'async-await-retry';
 import { DiscordProperties } from '../config';
 import { LockStore } from '../stores/LockStore';
