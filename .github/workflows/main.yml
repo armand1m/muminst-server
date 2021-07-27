@@ -50,12 +50,12 @@ jobs:
 
     - name: Set up Kustomize
       run: |-
+        cd ./kubernetes
         curl --location https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.2.0/kustomize_v4.2.0_linux_amd64.tar.gz | tar xz
         chmod u+x ./kustomize
 
     - name: Deploy
       run: |-
-        cd ./kubernetes
         ./kustomize edit set image IMAGE:SHA=$IMAGE:$GITHUB_SHA
         kubectl apply -k .
         kubectl rollout status deployment/$DEPLOYMENT_NAME

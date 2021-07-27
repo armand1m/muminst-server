@@ -6,7 +6,7 @@ RUN yarn
 COPY . .
 RUN yarn build
 
-FROM node:12-alpine
+FROM node:16-alpine
 RUN apk add --no-cache ffmpeg
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S muminst -u 1001
