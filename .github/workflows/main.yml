@@ -1,0 +1,63 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+name: Build and Deploy to GKE
+
+on: 
+  push:
+    branches:
+      - 'main'
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GKE_CLUSTER: cluster-1    # Add your cluster name here.
+  GKE_ZONE: us-central1-c   # Add your cluster zone here.
+  DEPLOYMENT_NAME: gke-test # Add your deployment name here.
+  IMAGE: armand1m/muminst-server 
+
+jobs:
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish, and Deploy
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - uses: google-github-actions/setup-gcloud
+      with:
+        service_account_key: ${{ secrets.GKE_SERVICE_ACCOUNT_KEY }}
+        project_id: ${{ secrets.GKE_PROJECT }}
+
+    - run: |-
+        gcloud --quiet auth configure-docker
+
+    - uses: google-github-actions/get-gke-credentials
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_ZONE }}
+        credentials: ${{ secrets.GKE_SERVICE_ACCOUNT_KEY }}
+
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: ${{ env.IMAGE }} 
+        tag_with_ref: true
+        tag_with_sha: true
+
+    - name: Set up Kustomize
+      run: |-
+        curl --location https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.2.0/kustomize_v4.2.0_linux_amd64.tar.gz | tar xz
+        chmod u+x ./kustomize
+
+    - name: Deploy
+      run: |-
+        cd ./kubernetes
+        ./kustomize edit set image IMAGE:SHA=$IMAGE:$GITHUB_SHA
+        kubectl apply -k .
+        kubectl rollout status deployment/$DEPLOYMENT_NAME
+        kubectl get services -o wide
+

@@ -1,0 +1,11 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: muminst-server 
+  namespace: default
+spec:
+  host: muminst-server
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+

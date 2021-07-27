@@ -1,17 +1,3 @@
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: muminst-server-pv-claim-csi
-  labels:
-    app: muminst-server
-spec:
-  storageClassName: standard-rwo 
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,7 +22,7 @@ spec:
         persistentVolumeClaim:
           claimName: muminst-server-pv-claim-csi
       containers:
-      - image: {{.image}}
+      - image: IMAGE:TAG 
         imagePullPolicy: IfNotPresent
         name: muminst-server 
         ports:
@@ -60,11 +46,7 @@ spec:
         - name: TELEGRAM_CHAT_ID
           value: "-389514977"
         - name: MUMBLE_ENABLED
-          value: "true"
-        - name: MUMBLE_URL
-          value: intruder.network
-        - name: MUMBLE_USERNAME
-          value: veio_hipocrita 
+          value: "false"
         - name: DISCORD_ENABLED
           value: "true"
         - name: DISCORD_BOT_TOKEN
@@ -88,52 +70,3 @@ spec:
         volumeMounts:
         - mountPath: /app/data
           name: muminst-server-volume
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: muminst-server
-  namespace: default
-  labels:
-    app: muminst-server
-spec:
-  ports:
-  - name: http
-    port: 4000
-    targetPort: 4000
-  selector:
-    app: muminst-server
-
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: muminst-server 
-  namespace: default
-spec:
-  host: muminst-server
-  trafficPolicy:
-    tls:
-      mode: DISABLE
-
----
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: muminst-server
-  namespace: default
-spec:
-  hosts:
-  - muminst-server.d1m.dev
-  - muminst-server.armand1m.dev
-  gateways:
-  - ingressgateway-workload
-  http:
-  - match:
-    - port: 443
-    route:
-    - destination:
-        host: muminst-server
-        port:
-          number: 4000

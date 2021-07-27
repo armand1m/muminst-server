@@ -1,0 +1,13 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: muminst-server-pv-claim-csi
+  labels:
+    app: muminst-server
+spec:
+  storageClassName: standard-rwo 
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
