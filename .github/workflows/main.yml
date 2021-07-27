@@ -58,7 +58,7 @@ jobs:
       run: |-
         cd ./kubernetes
         ./kustomize edit set image IMAGE:SHA=$IMAGE:$GITHUB_SHA
-        kubectl apply -k .
+        ./kustomize build . | kubectl apply -f -
         kubectl rollout status deployment/$DEPLOYMENT_NAME
         kubectl get services -o wide
 
