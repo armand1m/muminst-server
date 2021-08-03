@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { createReadStream } from 'fs'
+import { createReadStream, promises } from 'fs'
+import { inspect } from 'util'
 import { FileTypeResult, fromFile } from 'file-type';
 import { isEmpty } from 'ramda';
 import createHttpError from 'http-errors';
@@ -11,6 +12,7 @@ import { makeSound } from '../model/Sound';
 import { buildFilePath } from '../util/buildFilePath';
 
 type ValidExtension = 'mp3' | 'wav' | 'ogg' | 'webm'
+
 type FileExtension = FileTypeResult['ext']
 
 const validExtensions: FileExtension[] = [
@@ -32,17 +34,25 @@ const isValidFile = async (fileType?: FileTypeResult) => {
 };
 
 const processAudioFile = (filePath: string, fileExtension: FileExtension) => {
-  return new Promise<void>(async (resolve, reject) => {
+  return new Promise<string>(async (resolve, reject) => {
     const stream = createReadStream(filePath)
-
+    const outputPath = filePath + '_ffmpeg-filtered';
+    ffmpeg.ffprobe(filePath, function(_err, metadata) {
+      console.log(`Stats for ${filePath}:`)
+      console.log(inspect(metadata, false, null));
+    });
     ffmpeg(stream)
       .audioFilters('loudnorm')
       .on('error', reject)
-      .on('end', resolve)
+      .on('end', () => {
+        resolve(outputPath);
+      })
       .format(fileExtension)
-      .save(filePath);
+      .save(outputPath);
   });
 }
+
+const rename = promises.rename;
 
 export const uploadHandler = async (
   req: Request,
@@ -68,8 +78,11 @@ export const uploadHandler = async (
           }
 
           const fileExtension = fileType?.ext as ValidExtension;
-          await processAudioFile(file.tempFilePath, fileExtension); 
-
+          const filteredFile = await processAudioFile(file.tempFilePath, fileExtension); 
+          ffmpeg.ffprobe(filteredFile, function(_err, metadata) {
+            console.log(`Stats for ${filteredFile}:`)
+            console.log(inspect(metadata, false, null));
+          });
           const sound = await makeSound(file);
           const hashCheck = db.sounds.getByFileHash(sound.fileHash);
 
@@ -80,7 +93,7 @@ export const uploadHandler = async (
           }
 
           await db.sounds.add(sound);
-          await file.mv(buildFilePath(sound));
+          await rename(filteredFile, buildFilePath(sound));
 
           return {
             status: 'success',
