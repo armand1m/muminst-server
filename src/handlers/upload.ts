@@ -1,23 +1,26 @@
 import { NextFunction, Request, Response } from 'express';
-import { UploadedFile } from 'express-fileupload';
-import { FileTypeResult, fromBuffer } from 'file-type';
+import { createReadStream } from 'fs'
+import { FileTypeResult, fromFile } from 'file-type';
 import { isEmpty } from 'ramda';
 import createHttpError from 'http-errors';
 import HttpStatusCodes from 'http-status-codes';
+import ffmpeg from 'fluent-ffmpeg';
+
 import { db } from '../db';
 import { makeSound } from '../model/Sound';
 import { buildFilePath } from '../util/buildFilePath';
 
-const validExtensions: FileTypeResult['ext'][] = [
+type ValidExtension = 'mp3' | 'wav' | 'ogg' | 'webm'
+type FileExtension = FileTypeResult['ext']
+
+const validExtensions: FileExtension[] = [
   'mp3',
   'wav',
   'ogg',
   'webm',
 ];
 
-const isValidFile = async (file: UploadedFile) => {
-  const fileType = await fromBuffer(file.data);
-
+const isValidFile = async (fileType?: FileTypeResult) => {
   if (!fileType) {
     return false;
   }
@@ -27,6 +30,19 @@ const isValidFile = async (file: UploadedFile) => {
     fileType.mime === 'audio/mpeg'
   );
 };
+
+const processAudioFile = (filePath: string, fileExtension: FileExtension) => {
+  return new Promise<void>(async (resolve, reject) => {
+    const stream = createReadStream(filePath)
+
+    ffmpeg(stream)
+      .audioFilters('loudnorm')
+      .on('error', reject)
+      .on('end', resolve)
+      .format(fileExtension)
+      .save(filePath);
+  });
+}
 
 export const uploadHandler = async (
   req: Request,
@@ -44,11 +60,15 @@ export const uploadHandler = async (
     const allFilesMove = await Promise.all(
       Object.values(req.files).map(async (file) => {
         try {
-          const isValid = await isValidFile(file);
+          const fileType = await fromFile(file.tempFilePath);
+          const isValid = await isValidFile(fileType);
 
           if (!isValid) {
             throw new Error(`This type of file is not accepted.`);
           }
+
+          const fileExtension = fileType?.ext as ValidExtension;
+          await processAudioFile(file.tempFilePath, fileExtension); 
 
           const sound = await makeSound(file);
           const hashCheck = db.sounds.getByFileHash(sound.fileHash);
