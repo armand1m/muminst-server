@@ -48,7 +48,6 @@ const setupClient = (
         playFile,
         playSound: (sound) => {
           const filepath = buildFilePath(sound);
-          /** TODO: Send message to discord channel as well */
           playFile(filepath);
         },
       });
@@ -61,6 +60,24 @@ const setupClient = (
 
     client.on('message', async (message) => {
       if (!message.guild) return;
+
+      if (message.content === '/muminst-leave') {
+        const channel = message.member?.voice.channel;
+
+        if (!channel) {
+          message.reply('You need to join a voice channel first.');
+          return;
+        }
+
+        channel.leave();
+
+        if (_currentConnection) {
+          _currentConnection.disconnect();
+          _currentConnection = undefined;
+        }
+
+        logger.info(`Discord Client left channel "${channel.name}"`);
+      }
 
       if (message.content === '/muminst-join') {
         const channel = message.member?.voice.channel;

@@ -56,8 +56,6 @@ const main = async () => {
   const wsRouter = express.Router();
 
   wsRouter.ws('/ws', function (ws, _req) {
-    wsLogger.info('Client subscribing to lockStore changes.');
-
     const unsubscribeLockStore = lockStore.subscribe((state) => {
       if (ws.readyState === ws.OPEN) {
         const payload = JSON.stringify({
@@ -71,16 +69,12 @@ const main = async () => {
             );
             wsLogger.error(err);
           }
-
-          wsLogger.info('Message sent to the client.');
         });
       }
     });
 
     /** Connection recycling. */
     const recyclingInterval = setInterval(() => {
-      wsLogger.info('Running recycling interval for connection..');
-
       if (ws.readyState === ws.CLOSED) {
         wsLogger.info(
           'Client connection got closed. Terminating connection and listeners.'
@@ -89,7 +83,7 @@ const main = async () => {
         unsubscribeLockStore();
         clearInterval(recyclingInterval);
       }
-    }, 15000);
+    }, 30000);
   });
 
   Sentry.init({
