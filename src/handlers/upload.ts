@@ -29,7 +29,8 @@ const isValidFile = async (fileType?: FileTypeResult) => {
 
   return (
     validExtensions.includes(fileType.ext) ||
-    fileType.mime === 'audio/mpeg'
+    fileType.mime === 'audio/mpeg' || 
+    fileType.mime === 'audio/ogg'
   );
 };
 
