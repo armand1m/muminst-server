@@ -108,10 +108,7 @@ const main = async () => {
     .use(Sentry.Handlers.tracingHandler())
     .use(pinoHttp({ logger: httpServerLogger }))
     .use(cors())
-    .use(fileUpload({
-      useTempFiles: true,
-      tempFileDir: '/tmp/'
-    }))
+    .use(fileUpload())
     .use(bodyParser.json())
     .use(ConfigMiddleware)
     .use(InjectClientMiddleware(clients))
