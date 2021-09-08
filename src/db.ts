@@ -53,5 +53,8 @@ export const db = {
         .get('sounds')
         .remove((s) => s.id === id)
         .write(),
+
+    update: (id: string, sound: Sound) =>
+      _db.get('sounds').find({ id }).assign(sound).value(),
   },
 };
