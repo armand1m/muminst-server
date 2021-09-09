@@ -24,13 +24,13 @@ export const addTagHandler = async (
     if (isNilOrEmpty(sound)) {
       throw createHttpError(
         HttpStatusCodes.NOT_FOUND,
-        "Sound doesn't exists"
+        "Sound doesn't exist"
       );
     }
 
     const newSound = db.sounds.update(id, {
       ...sound,
-      tags: [...(sound.tags || []), ...tags],
+      tags: [...sound.tags, ...tags],
     });
 
     res.status(HttpStatusCodes.OK).json(newSound);

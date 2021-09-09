@@ -9,7 +9,7 @@ export type Sound = {
   extension: string;
   fileHash: string;
   fileName: string;
-  tags?: string[];
+  tags: string[];
 };
 
 export const makeSound = async (
@@ -28,5 +28,6 @@ export const makeSound = async (
     fileName,
     fileHash,
     id: uuid,
+    tags: [],
   };
 };

@@ -38,6 +38,13 @@ export const uploadHandler = async (
   const { tags } = req.body;
   const parsedTags = JSON.parse(tags);
 
+  if (isNilOrEmpty(tags)) {
+    throw createHttpError(
+      HttpStatusCodes.BAD_REQUEST,
+      'Tags should not be empty'
+    );
+  }
+
   try {
     if (!req.files || isEmpty(req.files)) {
       throw createHttpError(
