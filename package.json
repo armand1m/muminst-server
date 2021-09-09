@@ -36,7 +36,9 @@
     "build": "tsc",
     "test": "jest",
     "lint": "prettier --check './src/**/*.{tsx,ts}'",
-    "lint:fix": "prettier --write './src/**/*.{tsx,ts}'"
+    "lint:fix": "prettier --write './src/**/*.{tsx,ts}'",
+    "dev": "ts-node-dev --files ./src/main.ts",
+    "dev:pretty": "yarn dev | pino-pretty"
   },
   "main": "./build/main.js",
   "license": "MIT",
@@ -52,8 +54,10 @@
     "@types/pino-http": "^5.0.5",
     "@types/yup": "^0.29.7",
     "jest": "^26.5.2",
+    "nodemon": "^2.0.12",
     "pino-pretty": "^4.3.0",
     "prettier": "^2.1.2",
-    "ts-node": "^9.0.0"
+    "ts-node": "^10.2.1",
+    "ts-node-dev": "^1.1.8"
   }
 }
