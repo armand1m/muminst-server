@@ -7,6 +7,7 @@ import HttpStatusCodes from 'http-status-codes';
 import { db } from '../db';
 import { makeSound } from '../model/Sound';
 import { buildFilePath } from '../util/buildFilePath';
+import { isNilOrEmpty } from '../util/isNilOrEmpty';
 
 const validExtensions: FileTypeResult['ext'][] = [
   'mp3',
@@ -24,7 +25,8 @@ const isValidFile = async (file: UploadedFile) => {
 
   return (
     validExtensions.includes(fileType.ext) ||
-    fileType.mime === 'audio/mpeg'
+    fileType.mime === 'audio/mpeg' ||
+    fileType.mime === 'audio/ogg'
   );
 };
 
@@ -33,6 +35,16 @@ export const uploadHandler = async (
   res: Response,
   next: NextFunction
 ) => {
+  const { tags } = req.body;
+  const parsedTags = JSON.parse(tags);
+
+  if (isNilOrEmpty(tags)) {
+    throw createHttpError(
+      HttpStatusCodes.BAD_REQUEST,
+      'Tags should not be empty'
+    );
+  }
+
   try {
     if (!req.files || isEmpty(req.files)) {
       throw createHttpError(
@@ -59,7 +71,10 @@ export const uploadHandler = async (
             );
           }
 
-          await db.sounds.add(sound);
+          await db.sounds.add({
+            ...sound,
+            tags: isNilOrEmpty(parsedTags) ? [] : parsedTags,
+          });
           await file.mv(buildFilePath(sound));
 
           return {
@@ -92,6 +107,7 @@ export const uploadHandler = async (
     res.json({
       failed,
       successful,
+      tags: isNilOrEmpty(parsedTags) ? [] : parsedTags,
     });
   } catch (err) {
     next(err);
