@@ -18,11 +18,11 @@ export const downloadSoundsHandler = async (
       fs.readFileSync(`${dbPath}/database.json`)
     );
 
-    const audios = fs.readdirSync(audioPath);
+    const sounds = fs.readdirSync(audioPath);
 
-    audios.map((fileName) =>
+    sounds.map((fileName) =>
       zip.file(
-        `audios/${fileName}`,
+        `sounds/${fileName}`,
         fs.readFileSync(`${audioPath}/${fileName}`)
       )
     );
