@@ -22,7 +22,7 @@ export const downloadSoundsHandler = async (
 
     audios.map((fileName) =>
       zip.file(
-        `audios/${fileName}`,
+        `sounds/${fileName}`,
         fs.readFileSync(`${audioPath}/${fileName}`)
       )
     );
