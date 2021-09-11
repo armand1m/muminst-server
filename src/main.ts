@@ -21,6 +21,8 @@ import { getDiscordClient } from './services/discord';
 import { getTelegramClient } from './services/telegram';
 import { createLockStore } from './stores/LockStore';
 import { downloadSoundsHandler } from './handlers/downloadSounds';
+import { addTagHandler } from './handlers/addTag';
+
 
 const { proto, hostname, port } = Config.metadata;
 
@@ -118,6 +120,7 @@ const main = async () => {
     .get('/download-sounds', downloadSoundsHandler)
     .post('/play-sound', playSoundHandler)
     .post('/upload', uploadHandler)
+    .put('/add-tags/:id', addTagHandler)
     .use(wsRouter)
     .use(
       Sentry.Handlers.errorHandler({
