@@ -20,6 +20,7 @@ import { getMumbleClient } from './services/mumble';
 import { getDiscordClient } from './services/discord';
 import { getTelegramClient } from './services/telegram';
 import { createLockStore } from './stores/LockStore';
+import { downloadSoundsHandler } from './handlers/downloadSounds';
 
 const { proto, hostname, port } = Config.metadata;
 
@@ -114,6 +115,7 @@ const main = async () => {
     .use(InjectClientMiddleware(clients))
     .use('/assets', express.static(Config.filesystem.audioPath))
     .get('/sounds', soundsHandler)
+    .get('/download-sounds', downloadSoundsHandler)
     .post('/play-sound', playSoundHandler)
     .post('/upload', uploadHandler)
     .use(wsRouter)
