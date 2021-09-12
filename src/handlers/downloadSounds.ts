@@ -15,27 +15,26 @@ export const downloadSoundsHandler = async (
     const zip = new JSZip();
     zip.file(
       'database.json',
-      fs.readFileSync(`${dbPath}/database.json`)
+      await fs.promises.readFile(`${dbPath}/database.json`)
     );
 
-    const sounds = fs.readdirSync(audioPath);
+    const sounds = await fs.promises.readdir(audioPath);
 
-    sounds.map((fileName) =>
+    sounds.map(async (fileName) =>
       zip.file(
         `sounds/${fileName}`,
-        fs.readFileSync(`${audioPath}/${fileName}`)
+        await fs.promises.readFile(`${audioPath}/${fileName}`)
       )
     );
 
-    zip.generateAsync({ type: 'base64' }).then((zipFile) => {
-      const buffer = Buffer.from(zipFile, 'base64');
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename=backup-${getCurrentDate()}.zip`
-      );
-      res.setHeader('Content-Type', 'application/zip');
-      res.send(buffer);
-    });
+    const zipFile = await zip.generateAsync({ type: 'base64' });
+    const buffer = Buffer.from(zipFile, 'base64');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=backup-${getCurrentDate()}.zip`
+    );
+    res.setHeader('Content-Type', 'application/zip');
+    res.send(buffer);
   } catch (err) {
     next(err);
   }
