@@ -23,7 +23,6 @@ import { createLockStore } from './stores/LockStore';
 import { downloadSoundsHandler } from './handlers/downloadSounds';
 import { addTagHandler } from './handlers/addTag';
 
-
 const { proto, hostname, port } = Config.metadata;
 
 const httpServerLogger = logger.child({ source: 'http-server' });
