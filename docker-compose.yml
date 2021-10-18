@@ -3,19 +3,24 @@ services:
   app:
     build:
       context: .
-    image: muminst-server:latest
-    environment:
-      HOSTNAME: localhost
-      PORT: 4000
-      MUMBLE_URL: intruder.network
-      MUMBLE_USERNAME: InstantButtonComiOCuDeQuemTaLendo
-      AUDIO_PATH: /app/audio
+    env_file:
+      - .env
     volumes:
-      - ./audio:/app/audio
+      - ./data/audio:/app/data/audio
+      - ./data/db:/app/data/db
     ports:
       - 4000:4000/tcp
-    networks:
-      - overlay
+    restart: always
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - /etc/letsencrypt/live/muminst-server.octor.cc:/etc/nginx/certs
+      - ./nginx-proxy-config/vhost.d:/etc/nginx/vhost.d:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
 
 networks:
   overlay:
