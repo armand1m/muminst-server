@@ -1,5 +1,4 @@
 import path from 'path';
-import { omit } from 'ramda';
 import low from 'lowdb';
 import mkdirp from 'mkdirp';
 import FileSync from 'lowdb/adapters/FileSync';
@@ -35,11 +34,7 @@ _db
 
 export const db = {
   sounds: {
-    list: () =>
-      _db
-        .get('sounds')
-        .map(omit(['fileHash']))
-        .value(),
+    list: () => _db.get('sounds').value(),
 
     get: (id: string) => _db.get('sounds').find({ id }).value(),
 
