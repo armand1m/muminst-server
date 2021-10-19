@@ -91,7 +91,7 @@ const setupClient = (
           _currentConnection.disconnect();
         }
 
-        _currentConnection = await channel.join();
+        _currentConnection = await retry(() => channel.join());
 
         logger.info(
           `Discord Client joined channel "${channel.name}"`
