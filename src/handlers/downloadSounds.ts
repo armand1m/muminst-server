@@ -3,7 +3,7 @@ import archiver from 'archiver';
 import { Config } from '../config';
 import { getCurrentDate } from '../util/getCurrentDate';
 
-const { dbPath } = Config.filesystem;
+const { dbPath, audioPath } = Config.filesystem;
 
 export const downloadSoundsHandler = async (
   req: Request,
@@ -29,12 +29,17 @@ export const downloadSoundsHandler = async (
 
     archive.on('end', () => res.end());
 
-    archive.directory(dbPath, 'db');
+    archive.directory(dbPath, 'archive/db');
+    archive.directory(audioPath, 'archive/audio');
 
-    res.attachment(`backup-${getCurrentDate()}.zip`).type('zip');
+    res
+      .attachment(
+        `backup-${getCurrentDate().replaceAll('/', '-')}.zip`
+      )
+      .type('zip');
 
     archive.pipe(res);
-    archive.finalize();
+    await archive.finalize();
   } catch (err) {
     next(err);
   }
