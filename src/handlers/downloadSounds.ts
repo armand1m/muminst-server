@@ -27,6 +27,8 @@ export const downloadSoundsHandler = async (
       throw err;
     });
 
+    archive.on('end', () => res.end());
+
     archive.directory(dbPath, 'db');
 
     res.attachment(`backup-${getCurrentDate()}.zip`).type('zip');
