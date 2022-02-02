@@ -3,7 +3,7 @@ import archiver from 'archiver';
 import { Config } from '../config';
 import { getCurrentDate } from '../util/getCurrentDate';
 
-const { dbPath, audioPath } = Config.filesystem;
+const { dbPath } = Config.filesystem;
 
 export const downloadSoundsHandler = async (
   req: Request,
