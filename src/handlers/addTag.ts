@@ -13,7 +13,7 @@ export const addTagHandler = async (
     const { id } = req.params;
     const { tags } = req.body;
 
-    if (isNilOrEmpty(tags) || isNilOrEmpty(id)) {
+    if (isNilOrEmpty(id) || !Array.isArray(tags)) {
       throw createHttpError(
         HttpStatusCodes.BAD_REQUEST,
         'No tags or id specified'
