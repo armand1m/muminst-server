@@ -31,7 +31,7 @@ spec:
         - name: PROTO
           value: https
         - name: HOSTNAME
-          value: muminst-server.d1m.dev
+          value: muminst-server-old.d1m.dev
         - name: PORT
           value: "4000"
         - name: FEATURE_TEXT_MESSAGE_ON_PLAY_ENABLED
